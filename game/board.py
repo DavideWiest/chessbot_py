@@ -21,25 +21,48 @@ class ChessBoard():
         # 1 = black = on the bottom half
         # will be switched upside down when viewing because x=0 is at the bottom in chess
 
-        # pawn rows
+        # pawn row
         self.board[1, :, 0] = 1
-        self.board[6, :, 1] = 1
 
-        # to implement
         # rooks
-        self.board[0, 8]
-
-        # bishops
-
+        self.board[0, 7, 0] = 5
+        self.board[0, 0, 0] = 5
 
         # knights
+        self.board[0, 6, 0] = 3
+        self.board[0, 1, 0] = 3
 
+        # bishops
+        self.board[0, 5, 0] = 4
+        self.board[0, 2, 0] = 4
 
         # queens
-
+        self.board[0, 3, 0] = 9
 
         # kings
+        self.board[0, 4, 0] = 10
 
+
+        # pawn row
+        self.board[6, :, 1] = 1
+
+        # rooks
+        self.board[7, 7, 0] = 5
+        self.board[7, 0, 0] = 5
+
+        # knights
+        self.board[7, 6, 0] = 3
+        self.board[7, 1, 0] = 3
+
+        # bishops
+        self.board[7, 5, 0] = 4
+        self.board[7, 2, 0] = 4
+
+        # queens
+        self.board[7, 3, 0] = 9
+
+        # kings
+        self.board[7, 4, 0] = 10
 
         self.piecesPos = {
             0: {

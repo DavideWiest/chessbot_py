@@ -33,43 +33,14 @@ class King(Figure):
         while (0,0) in self.allMoves:
             self.allMoves.remove((0,0))
 
-    def isThreatenedNextMove(self, board: numpy.ndarray, position: tuple, side: int, piecesPos: dict, pieceId: int, pieceNum: int, level: int=1):
-        
-        allEnemyPieces = [
-            (pieceId, position)
-            for pieceId, piecelist in piecesPos[1 if side==0 else 0].items() 
-            for position in piecelist
-        ]
-
-        piecesPosCopy = piecesPos.copy()
-        piecesPosCopy[side][10][0] = position
-
-        board2 = board.copy()
-        board2[piecesPos[side][10][0][0], piecesPos[side][10][0][1], side] = 0
-        board2[position[0], position[1], 1 if side==0 else 0] = 0
-        board2[position[0], position[1], side] = 10
-
-        for pieceId, position in allEnemyPieces:
-            if any(pieceMovePos == position for pieceMovePos in PIECES_ID_TO_CLASS[pieceId].getLegalMoves(board, tuple(position), 1 if side==0 else 0, piecesPosCopy)):
-                return True
-
     def getLegalMoves(self, board: numpy.ndarray, position: tuple, side: int, piecesPos: dict, pieceId: int, pieceNum: int, level: int=1):
 
         # to implement
 
         moves = self.getLegalMovesByBoard(board, position, side)
 
-        moves = [
-            (x,y) for x,y in moves if board[position[0]+x, position[1]+y, side] != 0
-        ]
-
-        movesIllegalByCover = [
-            (x,y) for x,y in moves if self.isThreatenedNextMove(board, (position[0]+x, position[1]+y), side, piecesPos)
-        ]
-
-        moves = [
-            (x,y) for x,y in moves if (x,y) not in movesIllegalByCover
-        ]
+        if level == 1:
+            moves = filterForCheckNextMove(board, moves, position, side, piecesPos, pieceId, pieceNum)
 
         return [
             (position[0]+x, position[1]+y) for x,y in moves
@@ -147,6 +118,16 @@ class Pawn(Figure):
         ]
 
 class Knight(Figure):
+    def __init__(self):
+        self.allMoves = [
+            (2,1), (2,-1)
+            (1,2), (1,-2),
+            (-1,2), (-1,-2),
+            (-2,1), (-2,-1)
+        ]
+        while (0,0) in self.allMoves:
+            self.allMoves.remove((0,0))
+
     def getLegalMoves(self, board: numpy.ndarray, position: tuple, side: int, piecesPos: dict, pieceId: int, pieceNum: int, level: int=1):
 
         moves = self.getLegalMovesByBoard(board, position, side)
