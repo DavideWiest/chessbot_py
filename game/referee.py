@@ -9,7 +9,7 @@ class Referee():
         self.winner = None
         pass
     
-    def isValidMove(self, board: ChessBoard, fromPiece: tuple, move: Move, makeValidation: bool = True):
+    def isValidMove(self, board: numpy.ndarray, position: tuple, move: Move, makeValidation: bool = True):
         if makeValidation:
             # to implement
 

@@ -1,4 +1,3 @@
-from pieceClass import Figure
 from pieces import *
 from move import *
 from pieces import Pawn
@@ -17,7 +16,6 @@ class ChessBoard():
         "initialize board"
 
         self.board = numpy.zeros_like((8,8,2), dtype=numpy.byte)
-        self.lastMove = None
 
         # 0 = white = on the top half
         # 1 = black = on the bottom half
@@ -70,24 +68,24 @@ class ChessBoard():
         currentPiecePos[piecesPosIndex][0] += move.x
         currentPiecePos[piecesPosIndex][1] += move.y
 
-        for enemyPiecesPos in self.piecesPos[0 if move.side==1 else 1].values():
+        toRemove = None
+        for enemyPId, enemyPiecesPos in self.piecesPos[0 if move.side==1 else 1].items():
             for enemyPiecePos in enemyPiecesPos:
                 if enemyPiecePos == (
                     currentPiecePos[piecesPosIndex][0],
                     currentPiecePos[piecesPosIndex][1]
                 ):
-                    
+                    toRemove = (enemyPId, enemyPiecesPos.index(enemyPiecePos))
+                    break
 
+        if toRemove != None:
+            self.piecesPos[0 if move.side==1 else 1][toRemove[0]].pop(toRemove[1])
+            self.board[
+                currentPiecePos[piecesPosIndex][0],
+                currentPiecePos[piecesPosIndex][1],
+                0 if move.side==1 else 1
+            ] = 0
 
-        if self.board[
-            self.piecesPos[0 if move.side==1 else 1][move.p][piecesPosIndex][0],
-            self.piecesPos[0 if move.side==1 else 1][move.p][piecesPosIndex][1],
-            0 if move.side==1 else 1
-        ]:
-
-
-
-        self.lastMove = move
         return True
 
     def __repr__(self):

@@ -1,0 +1,8 @@
+
+referee (2)
+
+board (1)
+
+pieces (check if king in check -> check if piece stops check as function in base class) 
+(+ king cover checking: different args for different pieces -> as its own underlying fn)
+(2)

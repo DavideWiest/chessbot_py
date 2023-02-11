@@ -29,19 +29,20 @@ class GameHandler():
 
     def handleSingleMove(self):
         currentPlayer, currentPlayerStr = playerWhite, "white" if self.index % 2 == 1 else playerBlack, "black"
-        print(f"Move {self.index} - {currentPlayerStr}'s turn \n\n")
+        print(f"Move {self.index} - {currentPlayerStr.capitalize()}'s turn \n\n")
 
         piecePos, move = currentPlayer.getMove(self.board.board, self.board.piecesPos)
 
         if currentPlayer.needsValidityChecked:
-            if not self.referee.isValidMove(move):
+            if not self.referee.isValidMove(self.board.board, piecePos, move): 
+                print("\n -> Invalid move! \n")
                 self.handleSingleMove()
             else:
                 self.index += 1
         else:
             self.index += 1
 
-        self.board.makeMove(piecePos, move, currentPlayer.side)
+        self.board.makeMove(piecePos, move)
 
         self.lastMove = move
 
