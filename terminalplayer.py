@@ -1,15 +1,19 @@
-import game
+from game.board import *
+from game.pieces import *
+from game.player import *
+from game.move import *
+from game.referee import *
 
-class TerminalPlayer(game.Player):
+class TerminalPlayer(Player):
 
     def __init__(self, side: int):
         self.side = side
         self.needsMoveChecked = True
 
-    def printBoard(self, board: game.ChessBoard):
+    def printBoard(self, board: ChessBoard):
         print(board)
 
-    def getMove(self, board: game.ChessBoard, piecesPos):
+    def getMove(self, board: ChessBoard, piecesPos):
 
         self.printBoard(board)
 
@@ -40,6 +44,6 @@ class TerminalPlayer(game.Player):
                 piecesPos[move.side][move.p][piecesPosIndex][1]
         )
 
-        move = game.Move(move, self.side, piecePos)
+        move = Move(move, self.side, piecePos)
 
         return piecesPosIndex, piecePos, move

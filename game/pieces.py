@@ -1,7 +1,6 @@
-from board import ChessBoard
 import numpy
 
-from move import *
+from .move import *
 
 class Figure():
     """
@@ -120,7 +119,7 @@ class Pawn(Figure):
 class Knight(Figure):
     def __init__(self):
         self.allMoves = [
-            (2,1), (2,-1)
+            (2,1), (2,-1),
             (1,2), (1,-2),
             (-1,2), (-1,-2),
             (-2,1), (-2,-1)

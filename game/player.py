@@ -1,4 +1,4 @@
-from board import ChessBoard
+from .board import ChessBoard
 
 class Player():
 

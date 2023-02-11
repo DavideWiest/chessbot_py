@@ -50,7 +50,7 @@ if __name__ == "__main__":
     # run game
 
     available_players = {
-        1: terminalplayer
+        1: terminalplayer.TerminalPlayer
     }
 
     print("available players:")

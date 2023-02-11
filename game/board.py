@@ -1,7 +1,5 @@
-from pieces import *
-from move import *
-from pieces import Pawn
-from typing import Tuple
+from .pieces import *
+from .move import *
 import numpy
 
 
