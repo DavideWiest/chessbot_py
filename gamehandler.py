@@ -31,10 +31,10 @@ class GameHandler():
         currentPlayer, currentPlayerStr = playerWhite, "white" if self.index % 2 == 1 else playerBlack, "black"
         print(f"Move {self.index} - {currentPlayerStr.capitalize()}'s turn \n\n")
 
-        piecePos, move = currentPlayer.getMove(self.board.board, self.board.piecesPos)
+        piecesPosIndex, piecePos, move = currentPlayer.getMove(self.board.board, self.board.piecesPos)
 
         if currentPlayer.needsValidityChecked:
-            if not self.referee.isValidMove(self.board.board, piecePos, move): 
+            if not self.referee.isValidMove(self.board.board, piecePos, move, self.board.piecesPos, piecesPosIndex, self.lastMove): 
                 print("\n -> Invalid move! \n")
                 self.handleSingleMove()
             else:

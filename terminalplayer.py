@@ -42,4 +42,4 @@ class TerminalPlayer(game.Player):
 
         move = game.Move(move, self.side, piecePos)
 
-        return piecePos, move
+        return piecesPosIndex, piecePos, move
