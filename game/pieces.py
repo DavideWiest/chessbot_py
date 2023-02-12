@@ -16,10 +16,10 @@ class Figure():
         ]
 
         moves = [
-            (x,y) for x,y in moves if board[position[0]+x, position[1]+y, side] == 0
+            (x,y) for x,y in allmoves2 if board[position[0]+x, position[1]+y, side] == 0
         ]
 
-        return allmoves2
+        return moves
 
     def __repr__(self):
         return PIECES_ID_TO_STR[PIECES_CLASS_TO_ID[self.__class__.__name__]]

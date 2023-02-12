@@ -2,6 +2,7 @@ from .pieces import *
 from .move import *
 import numpy
 
+from colorama import Fore, Back, Style
 
 
 class ChessBoard():
@@ -156,4 +157,23 @@ class ChessBoard():
     def __str__(self):
         # to implement
 
-        return str(self.board)
+        rows = []
+
+        for rowindex in range(7):
+            rows.append(" ".join(
+                str(
+                    self.board[rowindex][colindex][0] 
+                    if self.board[rowindex][colindex][0] != 0 
+                    else self.board[rowindex][colindex][1]
+                )
+                for colindex in range(7)
+                ))
+
+        return "\n\n".join(rows)
+
+    def preparePiece(pieceId: int, side: int):
+        return (
+            Fore.GREEN + PIECES_ID_TO_STR(pieceId).upper() + Fore.RESET 
+            if side == 0 
+            else Fore.WHITE + PIECES_ID_TO_STR(pieceId).upper() + Fore.RESET
+        )

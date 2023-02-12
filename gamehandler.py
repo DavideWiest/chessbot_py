@@ -31,7 +31,7 @@ class GameHandler():
         currentPlayer, currentPlayerStr = (playerWhite, "white") if self.index % 2 == 1 else (playerBlack, "black")
         print(f"Move {self.index} - {currentPlayerStr.capitalize()}'s turn \n\n")
 
-        self.referee.computeAllLegalMoves(self.board.board, piecePos, currentPlayer.side, self.board.piecesPos, self.lastMove)
+        self.referee.computeAllLegalMoves(self.board.board, currentPlayer.side, self.board.piecesPos, self.lastMove)
 
         if currentPlayer.needsAllLegalMoves:
             piecesPosIndex, piecePos, move = currentPlayer.getMove(self.board.board, self.board.piecesPos)
