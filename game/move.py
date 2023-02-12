@@ -92,6 +92,13 @@ def convertToStrMoveXY(moveXY: tuple, p: int = 0):
 
     return x+y
 
+KING = 10
+PAWN = 1
+KNIGHT = 3
+BISHOP = 4
+ROOK = 5
+QUEEN = 9
+
 PIECES_STR_TO_ID = {
     "k": KING,
     "p": PAWN,

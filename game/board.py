@@ -15,61 +15,70 @@ class ChessBoard():
 
         self.board = numpy.zeros((8,8,2), dtype=numpy.byte)
 
-        # 0 = white = on the top half
-        # 1 = black = on the bottom half
+        # 0 = black = on the bottom half
+        # 1 = white = on the top half
         # will be switched upside down when viewing because x=0 is at the bottom in chess
 
         # pawn row
-        self.board[1, :, 0] = PAWN
+        self.board[1, :, BLACK] = PAWN
 
         # rooks
-        self.board[0, 7, 0] = ROOK
-        self.board[0, 0, 0] = ROOK
+        self.board[0, 7, BLACK] = ROOK
+        self.board[0, 0, BLACK] = ROOK
 
         # knights
-        self.board[0, 6, 0] = KNIGHT
-        self.board[0, 1, 0] = KNIGHT
+        self.board[0, 6, BLACK] = KNIGHT
+        self.board[0, 1, BLACK] = KNIGHT
 
         # bishops
-        self.board[0, 5, 0] = BISHOP
-        self.board[0, 2, 0] = BISHOP
+        self.board[0, 5, BLACK] = BISHOP
+        self.board[0, 2, BLACK] = BISHOP
 
         # queens
-        self.board[0, 4, 0] = QUEEN
+        self.board[0, 4, BLACK] = QUEEN
 
         # kings
-        self.board[0, 3, 0] = KING
+        self.board[0, 3, BLACK] = KING
 
 
         # pawn row
-        self.board[6, :, 1] = PAWN
+        self.board[6, :, WHITE] = PAWN
 
         # rooks
-        self.board[7, 7, 0] = ROOK
-        self.board[7, 0, 0] = ROOK
+        self.board[7, 7, WHITE] = ROOK
+        self.board[7, 0, WHITE] = ROOK
 
         # knights
-        self.board[7, 6, 0] = KNIGHT
-        self.board[7, 1, 0] = KNIGHT
+        self.board[7, 6, WHITE] = KNIGHT
+        self.board[7, 1, WHITE] = KNIGHT
 
         # bishops
-        self.board[7, 5, 0] = BISHOP
-        self.board[7, 2, 0] = BISHOP
+        self.board[7, 5, WHITE] = BISHOP
+        self.board[7, 2, WHITE] = BISHOP
 
         # queens
-        self.board[7, 4, 0] = QUEEN
+        self.board[7, 4, WHITE] = QUEEN
 
         # kings
-        self.board[7, 3, 0] = KING
+        self.board[7, 3, WHITE] = KING
 
         self.piecesPos = {
             0: {
-                KING: [[0,0]]
+                KING: [[3,0]],
+                PAWN: [],
+                KNIGHT: [],
+                BISHOP: [],
+                ROOK: [],
+                QUEEN: []
             },
             1: {
-                KING: [[0,0]]
+                KING: [[3,0]],
+                PAWN: [],
+                KNIGHT: [],
+                BISHOP: [],
+                ROOK: [],
+                QUEEN: []
             }
-            impement
         }
 
 
@@ -95,18 +104,18 @@ class ChessBoard():
         currentPiecePos[piecePosIndex][1] += move.y
 
         toRemove = None
-        for enemyPId, enemyPiecesPos in self.piecesPos[0 if move.side==1 else 1].items():
+        for enemyPId, enemyPiecesPos in self.piecesPos[OTHERSIDE(move.side)].items():
             for enemyPiecePos in enemyPiecesPos:
                 if enemyPiecePos == currentPiecePos[piecePosIndex]:
                     toRemove = (enemyPId, enemyPiecesPos.index(enemyPiecePos))
                     break
 
         if toRemove != None:
-            self.piecesPos[0 if move.side==1 else 1][toRemove[0]].pop(toRemove[1])
+            self.piecesPos[OTHERSIDE(move.side)][toRemove[0]].pop(toRemove[1])
             self.board[
                 currentPiecePos[piecePosIndex][0],
                 currentPiecePos[piecePosIndex][1],
-                0 if move.side==1 else 1
+                OTHERSIDE(move.side)
             ] = 0
 
         # castling

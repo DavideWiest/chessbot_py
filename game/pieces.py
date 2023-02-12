@@ -102,25 +102,25 @@ class Pawn(Figure):
         moves = self.getLegalMovesByBoard(board, position, side)
 
         # pawns can only move downwards if side == white else only upwards
-        sideDir = -1 if side==0 else 1
+        sideDir = DIRECTION(side)
         moves = [
             (x,sideDir*y) for x,y in moves
         ]
 
         if (-1,sideDir*1) in moves:
-            if board[position[0]-1, position[1]+sideDir*1, 1 if side==0 else 1] == 0:
+            if board[position[0]-1, position[1]+sideDir*1, OTHERSIDE(side)] == 0:
                 moves.remove((-1,sideDir*1))
 
                 # en passant
-                if board[position[0]-1, position[1], 1 if side==0 else 1] == PAWN and lastMove.x == position[0]+1 and lastMove.y == position[1]:
+                if board[position[0]-1, position[1], OTHERSIDE(side)] == PAWN and lastMove.x == position[0]+1 and lastMove.y == position[1]:
                     moves.add((1,sideDir*1))
 
         if (1,sideDir*1) in moves:
-            if board[position[0]+1, position[1], 1 if side==0 else 1] == 0:
+            if board[position[0]+1, position[1], OTHERSIDE(side)] == 0:
                 moves.remove((1,sideDir*1))
             
                 # en passant    
-                if board[position[0]+1, position[1], 1 if side==0 else 1] == PAWN and lastMove.x == position[0]+1 and lastMove.y == position[1]:
+                if board[position[0]+1, position[1], OTHERSIDE(side)] == PAWN and lastMove.x == position[0]+1 and lastMove.y == position[1]:
                     moves.add((1,sideDir*1))
 
         # if pawn hasnt moved yet: can move 2 pieces
@@ -219,7 +219,7 @@ def filterDiagonally(board: numpy.ndarray, moves, position: tuple, side: int):
                             moves.remove((x*d1,x*d2))
                             blocked = True
 
-                        if board[position[0]+x*d1, position[1]*x*d2, 0 if side==1 else 1] != 0:
+                        if board[position[0]+x*d1, position[1]*x*d2, OTHERSIDE(side)] != 0:
                             blocked = True
         
     return moves
@@ -237,7 +237,7 @@ def filterStraight(board: numpy.ndarray, moves, position: tuple, side: int):
                 moves.remove(((xOry,0)))
                 blockedX = True
 
-            if board[position[0]+xOry, position[1], 0 if side==1 else 1] != 0:
+            if board[position[0]+xOry, position[1], OTHERSIDE(side)] != 0:
                 blockedX = True
 
         if (0,xOry) in moves:
@@ -249,7 +249,7 @@ def filterStraight(board: numpy.ndarray, moves, position: tuple, side: int):
                 moves.remove(((0,xOry)))
                 blockedY = True
 
-            if board[position[0], position[1]+xOry, 0 if side==1 else 1] != 0:
+            if board[position[0], position[1]+xOry, OTHERSIDE(side)] != 0:
                 blockedY = True
                 
     return moves
@@ -300,8 +300,14 @@ def allIdInBoardRange(board: numpy.ndarray, xRange, yRange, sideOneOrBoth, wante
     return True
 
 
+BLACK = 0
+WHITE = 1
+
+OTHERSIDE = lambda side: WHITE if side==BLACK else BLACK
+DIRECTION = lambda side: 1 if side==BLACK else -1
+
 KING = 10
-PAWN = PAWN
+PAWN = 1
 KNIGHT = 3
 BISHOP = 4
 ROOK = 5
