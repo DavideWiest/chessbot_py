@@ -34,15 +34,17 @@ class TerminalPlayer(Player):
         if len(piecesPos[move2.side][move2.p]) > 1:
             optionStr = ""
             for i in range(len(piecesPos[move2.side][move2.p])):
+                # piecePos is wrong
+                print(piecesPos[move2.side][move2.p][i])
                 p1X = piecesPos[move2.side][move2.p][i][0]
                 p1Y = piecesPos[move2.side][move2.p][i][1]
-                p1Pos = convertToStrMoveXY((p1X, p1Y+1))
-                optionStr += f"\n{i}={p1Pos}"
+                p1Pos = convertToStrMoveXY((p1Y, p1X+1))
+                optionStr += f"\n  {i}={p1Pos}"
 
             try:
-                piecesPosIndex = int(input(f"Which piece? {optionStr} \n ->"))
+                piecesPosIndex = int(input(f"Which piece? {optionStr} \n  ->"))
             except:
-                piecesPosIndex = int(input(f"Try again: Which piece? {optionStr} \n ->"))
+                piecesPosIndex = int(input(f"Try again: Which piece? {optionStr} \n  ->"))
         else:
             piecesPosIndex = 0
 

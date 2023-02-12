@@ -10,19 +10,20 @@ class Referee():
         self.allLegalMoves = {}
         pass
 
-    def computeAllLegalMoves(self, board: numpy.ndarray, side: int, piecesPos: dict, lastMove: Move):
+    def computeAllLegalMoves(self, board: ChessBoard, side: int, lastMove: Move):
         self.allLegalMoves = {}
-        for pieceId in piecesPos[side]:
+        for pieceId in board.piecesPos[side]:
             # testing
             # print("PID")
             # print(pieceId)
-            for pieceIndex, piecePos in enumerate(piecesPos[side][pieceId]):
+            for pieceIndex, piecePos in enumerate(board.piecesPos[side][pieceId]):
                 # print("PIN")
                 # print(pieceIndex)
                 if pieceId == PAWN:
-                    self.allLegalMoves[(pieceId, pieceIndex)] = PIECES_ID_TO_CLASS[pieceId].getLegalMoves(board, tuple(piecePos), side, piecesPos, pieceId, pieceIndex, lastMove)
+                    self.allLegalMoves[(pieceId, pieceIndex)] = PIECES_ID_TO_CLASS[pieceId].getLegalMoves(board.board, tuple(piecePos), side, board.piecesPos, pieceId, pieceIndex, lastMove)
                 else:
-                    self.allLegalMoves[(pieceId, pieceIndex)] = PIECES_ID_TO_CLASS[pieceId].getLegalMoves(board, tuple(piecePos), side, piecesPos, pieceId, pieceIndex)
+                    self.allLegalMoves[(pieceId, pieceIndex)] = PIECES_ID_TO_CLASS[pieceId].getLegalMoves(board.board, tuple(piecePos), side, board.piecesPos, pieceId, pieceIndex)
+                print(self.allLegalMoves[(pieceId, pieceIndex)])
 
         if sum(len(pieceMoves) for pieceMoves in self.allLegalMoves.values()):
             self.winner = "black" if side == "white" else "white"
@@ -31,6 +32,10 @@ class Referee():
     def isValidMove(self, position: tuple, move: Move, pieceIndex: int):
 
         legalMovesOfPiece = self.allLegalMoves.get((move.p, pieceIndex), [])
+
+        print(self.allLegalMoves)
+        print(legalMovesOfPiece)
+
  
         return (position[0]+move.y, position[1]+move.x) in legalMovesOfPiece
 
