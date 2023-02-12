@@ -15,17 +15,17 @@ class Referee():
         for pieceId in piecesPos[side]:
             for pieceIndex, piecePos in enumerate(piecesPos[side][pieceId]):
                 if pieceId == PAWN:
-                    allLegalMoves[(pieceId, pieceIndex)] = PIECES_ID_TO_CLASS[pieceId].getLegalMoves(board, tuple(piecePos), side, piecesPos, pieceIndex, pieceIndex, lastMove)
+                    allLegalMoves[(pieceId, pieceIndex)] = PIECES_ID_TO_CLASS[pieceId].getLegalMoves(board, tuple(piecePos), side, piecesPos, pieceId, pieceIndex, lastMove)
                 else:
-                    allLegalMoves[(pieceId, pieceIndex)] = PIECES_ID_TO_CLASS[pieceId].getLegalMoves(board, tuple(piecePos), side, piecesPos, pieceIndex, pieceIndex)
+                    allLegalMoves[(pieceId, pieceIndex)] = PIECES_ID_TO_CLASS[pieceId].getLegalMoves(board, tuple(piecePos), side, piecesPos, pieceId, pieceIndex)
 
         if sum(sum(pieceMoves) for pieceMoves in allLegalMoves.values()):
             self.winner = "black" if side == "white" else "white"
 
 
-    def isValidMove(self, position: tuple, move: Move, pieceNum: int):
+    def isValidMove(self, position: tuple, move: Move, pieceIndex: int):
 
-        legalMovesOfPiece = self.allLegalMoves.get((move.p, pieceNum), [])
+        legalMovesOfPiece = self.allLegalMoves.get((move.p, pieceIndex), [])
  
         return (position[0]+move.y, position[1]+move.x) in legalMovesOfPiece
 
