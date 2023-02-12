@@ -34,9 +34,9 @@ class GameHandler():
         self.referee.computeAllLegalMoves(self.board.board, currentPlayer.side, self.board.piecesPos, self.lastMove)
 
         if currentPlayer.needsAllLegalMoves:
-            piecesPosIndex, piecePos, move = currentPlayer.getMove(self.board.board, self.board.piecesPos)
+            piecesPosIndex, piecePos, move = currentPlayer.getMove(self.board, self.referee.allLegalMovesLastRound)
         else:
-            piecesPosIndex, piecePos, move = currentPlayer.getMove(self.board.board, self.board.piecesPos)
+            piecesPosIndex, piecePos, move = currentPlayer.getMove(self.board)
 
         if currentPlayer.needsValidityChecked:
             if not self.referee.isValidMove(piecePos, move, piecesPosIndex): 
@@ -61,8 +61,8 @@ if __name__ == "__main__":
     print("available players:")
     print("\n".join(f"{k}: {v}" for k,v in available_players.items()))
 
-    playerWhite = available_players[int(input("Player white: "))](0)
-    playerBlack = available_players[int(input("Player black: "))](1)
+    playerWhite = available_players[int(input("Player white: "))](0, "green")
+    playerBlack = available_players[int(input("Player black: "))](1, "yellow")
 
     gh = GameHandler(playerWhite, playerBlack)
     gh.run()

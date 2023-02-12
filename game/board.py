@@ -2,6 +2,7 @@ from .pieces import *
 from .move import *
 import numpy
 
+from string import ascii_uppercase
 from colorama import Fore, Back, Style
 
 
@@ -67,18 +68,18 @@ class ChessBoard():
             0: {
                 KING: [[0,3]],
                 PAWN: [[1,x] for x in range(8)],
-                KNIGHT: [[0,1], [0,6]],
                 BISHOP: [[0,2], [0,5]],
                 ROOK: [[0,0], [0,7]],
-                QUEEN: [[0,4]]
+                QUEEN: [[0,4]],
+                KNIGHT: [[0,1], [0,6]]
             },
             1: {
                 KING: [[7,3]],
                 PAWN: [[6,x] for x in range(8)],
-                KNIGHT: [[7,1], [7,6]],
                 BISHOP: [[7,2], [7,5]],
                 ROOK: [[7,0], [7,7]],
-                QUEEN: [[7,4]]
+                QUEEN: [[7,4]],
+                KNIGHT: [[7,1], [7,6]]
             }
         }
 
@@ -155,25 +156,29 @@ class ChessBoard():
         return self.__str__()
 
     def __str__(self):
-        # to implement
 
         rows = []
 
-        for rowindex in range(7):
-            rows.append(" ".join(
+        for rowindex in range(8):
+            rows.append(f"{8-rowindex}   " + "   ".join(
                 str(
-                    self.board[rowindex][colindex][0] 
+                    self.preparePiece(self.board[rowindex][colindex][0], 0)
                     if self.board[rowindex][colindex][0] != 0 
-                    else self.board[rowindex][colindex][1]
+                    else self.preparePiece(self.board[rowindex][colindex][1], 1)
                 )
-                for colindex in range(7)
+                for colindex in range(8)
                 ))
+        rows.append(
+            "    " + "   ".join([f"{ascii_uppercase[i]}" for i in range(8)])
+        )
 
         return "\n\n".join(rows)
 
-    def preparePiece(pieceId: int, side: int):
+    def preparePiece(self, pieceId: int, side: int):
+        if pieceId == 0:
+            return Style.DIM + Fore.LIGHTWHITE_EX +  "_"  + Fore.RESET + Style.RESET_ALL
         return (
-            Fore.GREEN + PIECES_ID_TO_STR(pieceId).upper() + Fore.RESET 
+            Fore.GREEN + PIECES_ID_TO_STR[pieceId].upper() + Fore.RESET 
             if side == 0 
-            else Fore.WHITE + PIECES_ID_TO_STR(pieceId).upper() + Fore.RESET
+            else Fore.YELLOW + PIECES_ID_TO_STR[pieceId].upper() + Fore.RESET
         )

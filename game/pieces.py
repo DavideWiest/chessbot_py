@@ -257,18 +257,29 @@ def filterStraight(board: numpy.ndarray, moves, position: tuple, side: int):
     return moves
 
 def filterForCheckNextMove(board: numpy.ndarray, moves, position: tuple, side: int, piecesPos: dict, pieceId: int, pieceIndex: int):
+    
     position_orig = position
     moves2 = []
+
+    print("moves")
+    print(moves)
+    print("-------------------")
     for move in moves:
         position = (position_orig[0]+move[1], position_orig[1]+move[0])
 
         allEnemyPieces = [
-            (pieceId, enemypieceIndex)
-            for pieceId, piecelist in piecesPos[OTHERSIDE(side)].items() 
+            (pieceId2, enemypieceIndex)
+            for pieceId2, piecelist in piecesPos[OTHERSIDE(side)].items() 
             for enemypieceIndex in range(len(piecelist))
         ]
 
         piecesPosCopy = piecesPos.copy()
+        # # testing
+        # print("PID 5")
+        # print(piecesPosCopy)
+        # print(side)
+        # print(pieceId)
+        # print(pieceIndex)
         piecesPosCopy[side][pieceId][pieceIndex] = position
 
         board2 = board.copy()
@@ -277,12 +288,16 @@ def filterForCheckNextMove(board: numpy.ndarray, moves, position: tuple, side: i
         board2[position[0], position[1], side] = pieceId
         board2[position[0], position[1], OTHERSIDE(side)] = 0
 
-        # testing
-        print(piecesPosCopy)
+        print(allEnemyPieces)
 
         for pieceId, enemypieceIndex in allEnemyPieces:
+            print(pieceId)
+            print(enemypieceIndex)
             if not any(pieceMovePos == piecesPosCopy[side][KING][0] for pieceMovePos in PIECES_ID_TO_CLASS[pieceId].getLegalMoves(board, tuple(piecesPosCopy[OTHERSIDE(side)][pieceId][enemypieceIndex]), OTHERSIDE(side), piecesPosCopy, pieceId, enemypieceIndex, level=2)):
                 moves2.append(move)
+            print("----")
+        print("---------")
+
 
     return moves2
 

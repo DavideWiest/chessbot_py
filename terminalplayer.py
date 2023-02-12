@@ -4,32 +4,38 @@ from game.player import *
 from game.move import *
 from game.referee import *
 
+import traceback
+
 class TerminalPlayer(Player):
 
-    def __init__(self, side: int):
+    def __init__(self, side: int, color: str):
         self.side = side
-        self.needsMoveChecked = True
+        self.color = color
+        self.needsValidityChecked = True
         self.needsAllLegalMoves = False
 
     def printBoard(self, board: ChessBoard):
-        print(board)
+        print(str(board))
 
-    def getMove(self, board: ChessBoard, piecesPos):
+    def getMove(self, board: ChessBoard):
+
+        piecesPos = board.piecesPos
 
         self.printBoard(board)
 
-        move = input("Your Move: ")
+        move = input(f"Your Move ({self.color}): ")
         try:
-            move = Move(move, self.side, (0,0))
+            move2 = Move(move, self.side, (0,0))
         except ValueError:
+            print(traceback.format_exc())
             print("Invalid move. Try again \n")
-            return self.getMove(board, piecesPos)
+            return self.getMove(board)
 
-        if len(piecesPos[move.side][move.p]) > 1:
+        if len(piecesPos[move2.side][move2.p]) > 1:
             optionStr = ""
-            for i in range(len(piecesPos[move.side][move.p])):
-                p1X = piecesPos[move.side][move.p][i][0]
-                p1Y = piecesPos[move.side][move.p][i][1]
+            for i in range(len(piecesPos[move2.side][move2.p])):
+                p1X = piecesPos[move2.side][move2.p][i][0]
+                p1Y = piecesPos[move2.side][move2.p][i][1]
                 p1Pos = convertToStrMoveXY((p1X, p1Y+1))
                 optionStr += f"\n{i}={p1Pos}"
 
@@ -41,10 +47,11 @@ class TerminalPlayer(Player):
             piecesPosIndex = 0
 
         piecePos = (
-                piecesPos[move.side][move.p][piecesPosIndex][0],
-                piecesPos[move.side][move.p][piecesPosIndex][1]
+                piecesPos[move2.side][move2.p][piecesPosIndex][0],
+                piecesPos[move2.side][move2.p][piecesPosIndex][1]
         )
 
         move = Move(move, self.side, piecePos)
 
+        # determines the move, and which piece is used for it
         return piecesPosIndex, piecePos, move

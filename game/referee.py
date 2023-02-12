@@ -7,19 +7,24 @@ class Referee():
 
     def __init__(self):
         self.winner = None
-        self.allLegalMovesLastRound = {}
+        self.allLegalMoves = {}
         pass
 
     def computeAllLegalMoves(self, board: numpy.ndarray, side: int, piecesPos: dict, lastMove: Move):
-        allLegalMoves = {}
+        self.allLegalMoves = {}
         for pieceId in piecesPos[side]:
+            # testing
+            # print("PID")
+            # print(pieceId)
             for pieceIndex, piecePos in enumerate(piecesPos[side][pieceId]):
+                # print("PIN")
+                # print(pieceIndex)
                 if pieceId == PAWN:
-                    allLegalMoves[(pieceId, pieceIndex)] = PIECES_ID_TO_CLASS[pieceId].getLegalMoves(board, tuple(piecePos), side, piecesPos, pieceId, pieceIndex, lastMove)
+                    self.allLegalMoves[(pieceId, pieceIndex)] = PIECES_ID_TO_CLASS[pieceId].getLegalMoves(board, tuple(piecePos), side, piecesPos, pieceId, pieceIndex, lastMove)
                 else:
-                    allLegalMoves[(pieceId, pieceIndex)] = PIECES_ID_TO_CLASS[pieceId].getLegalMoves(board, tuple(piecePos), side, piecesPos, pieceId, pieceIndex)
+                    self.allLegalMoves[(pieceId, pieceIndex)] = PIECES_ID_TO_CLASS[pieceId].getLegalMoves(board, tuple(piecePos), side, piecesPos, pieceId, pieceIndex)
 
-        if sum(sum(pieceMoves) for pieceMoves in allLegalMoves.values()):
+        if sum(len(pieceMoves) for pieceMoves in self.allLegalMoves.values()):
             self.winner = "black" if side == "white" else "white"
 
 

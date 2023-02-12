@@ -36,10 +36,10 @@ class Move():
         else:
             piece, posX, posY = "p" + move
 
-        if posX.isnumeric():
-            if piece not in ascii_lowercase[:8]:
+        if not posX.isnumeric():
+            if posX not in ascii_lowercase[:8]:
                 raise ValueError
-            posX = ascii_lowercase.index(piece)
+            posX = ascii_lowercase.index(posX)
         else:
             posX = int(posX)-1
 
@@ -54,13 +54,10 @@ class Move():
         if posY < 0 or posX > 8:
             raise ValueError
 
-        if piece.isnumeric():
-            piece = int(piece)
-        else:
-            if piece not in game.PIECES_STR_TO_ID:
-                raise ValueError
+        if piece not in PIECES_STR_TO_ID:
+            raise ValueError
 
-            piece = game.PIECES_STR_TO_ID[piece]
+        piece = PIECES_STR_TO_ID[piece]
 
         self.original = move_orig
         self.p = piece
