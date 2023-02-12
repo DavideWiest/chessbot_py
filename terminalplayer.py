@@ -9,6 +9,7 @@ class TerminalPlayer(Player):
     def __init__(self, side: int):
         self.side = side
         self.needsMoveChecked = True
+        self.needsAllLegalMoves = False
 
     def printBoard(self, board: ChessBoard):
         print(board)
@@ -19,17 +20,17 @@ class TerminalPlayer(Player):
 
         move = input("Your Move: ")
         try:
-            move = game.Move(move, self.side, (0,0))
+            move = Move(move, self.side, (0,0))
         except ValueError:
             print("Invalid move. Try again \n")
             return self.getMove(board, piecesPos)
 
-        if move.p not in (9,10) and len(piecesPos[move.side][move.p]) > 1:
+        if len(piecesPos[move.side][move.p]) > 1:
             optionStr = ""
             for i in range(len(piecesPos[move.side][move.p])):
                 p1X = piecesPos[move.side][move.p][i][0]
                 p1Y = piecesPos[move.side][move.p][i][1]
-                p1Pos = game.convertToStrMoveXY((p1X-1, p1Y))
+                p1Pos = convertToStrMoveXY((p1X, p1Y+1))
                 optionStr += f"\n{i}={p1Pos}"
 
             try:

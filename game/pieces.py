@@ -38,6 +38,20 @@ class King(Figure):
 
         moves = self.getLegalMovesByBoard(board, position, side)
 
+        # castling
+        startPos = (0 if side==0 else 7, KNIGHT)
+
+        # if king and rook in startposition, and none of the spaces in between are occupied
+        if position == startPos and \
+            board[startPos[0], 0, side] == ROOK and \
+            allIdInBoardRange(board, startPos[0], (1,3), (0,1), 0):
+            moves.add((startPos[0], 1))
+        
+        if position == startPos and \
+            board[startPos[0], 7, side] == ROOK and \
+            allIdInBoardRange(board, startPos[0], (4,7), (0,1), 0):
+            moves.add((startPos[0], 6))
+
         if level == 1:
             moves = filterForCheckNextMove(board, moves, position, side, piecesPos, pieceId, pieceNum)
 
@@ -98,7 +112,7 @@ class Pawn(Figure):
                 moves.remove((-1,sideDir*1))
 
                 # en passant
-                if board[position[0]+1, position[1], 1 if side==0 else 1] == 1 and lastMove.x == position[0]+1 and lastMove.y == position[1]:
+                if board[position[0]-1, position[1], 1 if side==0 else 1] == PAWN and lastMove.x == position[0]+1 and lastMove.y == position[1]:
                     moves.add((1,sideDir*1))
 
         if (1,sideDir*1) in moves:
@@ -106,8 +120,16 @@ class Pawn(Figure):
                 moves.remove((1,sideDir*1))
             
                 # en passant    
-                if board[position[0]+1, position[1], 1 if side==0 else 1] == 1 and lastMove.x == position[0]+1 and lastMove.y == position[1]:
+                if board[position[0]+1, position[1], 1 if side==0 else 1] == PAWN and lastMove.x == position[0]+1 and lastMove.y == position[1]:
                     moves.add((1,sideDir*1))
+
+        # if pawn hasnt moved yet: can move 2 pieces
+        startPos = 1 if side==0 else 6
+        # if pawn hasnt moved yet, space is not occupied, and piece can move 1 further already
+        if position[0] == startPos and \
+            allIdInBoardRange(board, position[0], position[1]+sideDir*2, (0,1), 0) and \
+            (0,sideDir*1) in moves:
+            moves.add((0, sideDir*2))
 
         if level == 1:
             moves = filterForCheckNextMove(board, moves, position, side, piecesPos, pieceId, pieceNum)
@@ -245,7 +267,7 @@ def filterForCheckNextMove(board: numpy.ndarray, moves, position: tuple, side: i
         ]
 
         piecesPosCopy = piecesPos.copy()
-        piecesPosCopy[side][10][0] = position
+        piecesPosCopy[side][KING][0] = position
 
         board2 = board.copy()
         board2[piecesPos[side][pieceId][pieceNum][0], piecesPos[side][pieceId][pieceNum][1], side] = 0
@@ -253,36 +275,63 @@ def filterForCheckNextMove(board: numpy.ndarray, moves, position: tuple, side: i
         board2[position[0], position[1], side] = pieceId
 
         for pieceId, position in allEnemyPieces:
-            if not any(pieceMovePos == piecesPosCopy[side][10][0] for pieceMovePos in PIECES_ID_TO_CLASS[pieceId].getLegalMoves(board, tuple(position), 1 if side==0 else 0, piecesPosCopy, level=2)):
+            if not any(pieceMovePos == piecesPosCopy[side][KING][0] for pieceMovePos in PIECES_ID_TO_CLASS[pieceId].getLegalMoves(board, tuple(position), 1 if side==0 else 0, piecesPosCopy, level=2)):
                 moves2.append(move)
 
     return moves2
 
+
+def allIdInBoardRange(board: numpy.ndarray, xRange, yRange, sideOneOrBoth, wantedId=0):
+    """ sideOneOrBoth: int -> one side, anything else -> both sides 
+        xRange, yRange: tuple: range, anything else (int) -> the one int
+    """
+    xRange = range(*xRange) if isinstance(xRange, tuple) else range(xRange, xRange+1)
+    yRange = range(*yRange) if isinstance(yRange, tuple) else range(yRange, yRange+1)
+
+    for x in xRange:
+        for y in yRange:
+            if isinstance(sideOneOrBoth, int):
+                if board[x,y,sideOneOrBoth] != wantedId:
+                    return False
+            else:
+                if board[x,y,0] != wantedId or board[x,y,1] != wantedId:
+                    return False
+
+    return True
+
+
+KING = 10
+PAWN = PAWN
+KNIGHT = 3
+BISHOP = 4
+ROOK = 5
+QUEEN = 9
+
 PIECES_ID_TO_CLASS = {
-    10: King(),
-    1: Pawn(),
-    3: Knight(),
-    4: Bishop(),
-    5: Rook(),
-    9: Queen()
+    KING: King(),
+    PAWN: Pawn(),
+    KNIGHT: Knight(),
+    BISHOP: Bishop(),
+    ROOK: Rook(),
+    QUEEN: Queen()
 }
 
 PIECES_CLASS_TO_ID = {
-    "King": 10,
-    "Pawn": 1,
-    "Knight": 3,
-    "Bishop": 4,
-    "Rook": 5,
-    "Queen": 9 
+    "King": KING,
+    "Pawn": PAWN,
+    "Knight": KNIGHT,
+    "Bishop": BISHOP,
+    "Rook": ROOK,
+    "Queen": QUEEN 
 }
 
 PIECES_STR_TO_ID = {
-    "k": 10,
-    "p": 1,
-    "n": 3,
-    "b": 4,
-    "r": 5,
-    "q": 9
+    "k": KING,
+    "p": PAWN,
+    "n": KNIGHT,
+    "b": BISHOP,
+    "r": ROOK,
+    "q": QUEEN
 }
 
 PIECES_ID_TO_STR = {v: k for k, v in PIECES_STR_TO_ID.items()}

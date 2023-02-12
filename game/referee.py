@@ -7,20 +7,29 @@ class Referee():
 
     def __init__(self):
         self.winner = None
+        self.allLegalMovesLastRound = {}
         pass
-    
-    def isValidMove(self, board: numpy.ndarray, position: tuple, move: Move, piecesPos: dict, pieceNum: int, lastMove: Move):
-        if move.p == 1:
-            legalMoves = PIECES_ID_TO_CLASS(move.p).getLegalMoves(board, position, move.side, piecesPos, move.p, pieceNum, lastMove)
-        else:
-            legalMoves = PIECES_ID_TO_CLASS(move.p).getLegalMoves(board, position, move.side, piecesPos, move.p, pieceNum)
 
-        if legalMoves == []:
-            self.winner = "black" if move.side == "white" else "white"
+    def computeAllLegalMoves(self, board: numpy.ndarray, side: int, piecesPos: dict, lastMove: Move):
+        allLegalMoves = {}
+        for pieceId in piecesPos[side]:
+            for pieceIndex, piecePos in enumerate(piecesPos[side][pieceId]):
+                if pieceId == PAWN:
+                    allLegalMoves[(pieceId, pieceIndex)] = PIECES_ID_TO_CLASS(pieceId).getLegalMoves(board, tuple(piecePos), side, piecesPos, pieceIndex, pieceIndex, lastMove)
+                else:
+                    allLegalMoves[(pieceId, pieceIndex)] = PIECES_ID_TO_CLASS(pieceId).getLegalMoves(board, tuple(piecePos), side, piecesPos, pieceIndex, pieceIndex)
 
-        return (position[0]+move.x, position[1]+move.y) in legalMoves
+        if sum(sum(pieceMoves) for pieceMoves in allLegalMoves.values()):
+            self.winner = "black" if side == "white" else "white"
 
-    def checkForEnd(self, board: ChessBoard):
+
+    def isValidMove(self, position: tuple, move: Move, pieceNum: int):
+
+        legalMovesOfPiece = self.allLegalMoves.get((move.p, pieceNum), [])
+ 
+        return (position[0]+move.x, position[1]+move.y) in legalMovesOfPiece
+
+    def isMatchFinished(self):
         return self.winner != None
 
     def getWinner(self):

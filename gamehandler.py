@@ -28,13 +28,18 @@ class GameHandler():
         print(f"Game finished. {winner} won")
 
     def handleSingleMove(self):
-        currentPlayer, currentPlayerStr = playerWhite, "white" if self.index % 2 == 1 else playerBlack, "black"
+        currentPlayer, currentPlayerStr = (playerWhite, "white") if self.index % 2 == 1 else (playerBlack, "black")
         print(f"Move {self.index} - {currentPlayerStr.capitalize()}'s turn \n\n")
 
-        piecesPosIndex, piecePos, move = currentPlayer.getMove(self.board.board, self.board.piecesPos)
+        self.referee.computeAllLegalMoves(self.board.board, piecePos, currentPlayer.side, self.board.piecesPos, self.lastMove)
+
+        if currentPlayer.needsAllLegalMoves:
+            piecesPosIndex, piecePos, move = currentPlayer.getMove(self.board.board, self.board.piecesPos)
+        else:
+            piecesPosIndex, piecePos, move = currentPlayer.getMove(self.board.board, self.board.piecesPos)
 
         if currentPlayer.needsValidityChecked:
-            if not self.referee.isValidMove(self.board.board, piecePos, move, self.board.piecesPos, piecesPosIndex, self.lastMove): 
+            if not self.referee.isValidMove(piecePos, move, piecesPosIndex): 
                 print("\n -> Invalid move! \n")
                 self.handleSingleMove()
             else:
@@ -54,7 +59,7 @@ if __name__ == "__main__":
     }
 
     print("available players:")
-    print(available_players)
+    print("\n".join(f"{k}: {v}" for k,v in available_players.items()))
 
     playerWhite = available_players[int(input("Player white: "))](0)
     playerBlack = available_players[int(input("Player black: "))](1)
