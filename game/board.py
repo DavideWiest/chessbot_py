@@ -160,7 +160,8 @@ class ChessBoard():
         rows = []
 
         for rowindex in range(8):
-            rows.append(f"{8-rowindex}   " + "   ".join(
+            # rows.append(f"{8-rowindex}   " + "   ".join(
+            rows.append(f"{rowindex}   " + "   ".join(
                 str(
                     self.preparePiece(self.board[rowindex][colindex][0], 0)
                     if self.board[rowindex][colindex][0] != 0 
@@ -168,8 +169,11 @@ class ChessBoard():
                 )
                 for colindex in range(8)
                 ))
+        # rows.append(
+        #     "    " + "   ".join([f"{ascii_uppercase[i]}" for i in range(8)])
+        # )
         rows.append(
-            "    " + "   ".join([f"{ascii_uppercase[i]}" for i in range(8)])
+            "    " + "   ".join([f"{i}" for i in range(8)])
         )
 
         return "\n\n".join(rows)

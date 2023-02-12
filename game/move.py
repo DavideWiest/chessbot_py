@@ -80,7 +80,7 @@ class MoveWithInts(Move):
 def convertToStrMoveXY(moveXY: tuple, p: int = 0):
 
     x = ascii_lowercase[moveXY[0]]
-    y = str(moveXY[1])
+    y = str(8-moveXY[1])
 
     if p != 0:
         p = PIECES_ID_TO_STR[p]

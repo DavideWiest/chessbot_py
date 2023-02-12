@@ -23,6 +23,7 @@ class Referee():
                     self.allLegalMoves[(pieceId, pieceIndex)] = PIECES_ID_TO_CLASS[pieceId].getLegalMoves(board.board, tuple(piecePos), side, board.piecesPos, pieceId, pieceIndex, lastMove)
                 else:
                     self.allLegalMoves[(pieceId, pieceIndex)] = PIECES_ID_TO_CLASS[pieceId].getLegalMoves(board.board, tuple(piecePos), side, board.piecesPos, pieceId, pieceIndex)
+                print(pieceId)
                 print(self.allLegalMoves[(pieceId, pieceIndex)])
 
         if sum(len(pieceMoves) for pieceMoves in self.allLegalMoves.values()):
