@@ -16,7 +16,7 @@ class Figure():
         ]
 
         moves = [
-            (x,y) for x,y in allmoves2 if board[position[0]+x, position[1]+y, side] == 0
+            (x,y) for x,y in allmoves2 if board[position[0]+y, position[1]+x, side] == 0
         ]
 
         return moves
@@ -39,7 +39,7 @@ class King(Figure):
         moves = self.getLegalMovesByBoard(board, position, side)
 
         # castling
-        startPos = (0 if side==0 else 7, KNIGHT)
+        startPos = (0 if side==0 else 7, 3)
 
         # if king and rook in startposition, and none of the spaces in between are occupied
         if position == startPos and \
@@ -108,26 +108,26 @@ class Pawn(Figure):
         ]
 
         if (-1,sideDir*1) in moves:
-            if board[position[0]-1, position[1]+sideDir*1, OTHERSIDE(side)] == 0:
+            if board[position[0]+sideDir*1, position[1]-1, OTHERSIDE(side)] == 0:
                 moves.remove((-1,sideDir*1))
 
                 # en passant
-                if board[position[0]-1, position[1], OTHERSIDE(side)] == PAWN and lastMove.x == position[0]+1 and lastMove.y == position[1]:
+                if board[position[0], position[1]-1, OTHERSIDE(side)] == PAWN and lastMove.x == position[0]+1 and lastMove.y == position[1]:
                     moves.add((1,sideDir*1))
 
         if (1,sideDir*1) in moves:
-            if board[position[0]+1, position[1], OTHERSIDE(side)] == 0:
+            if board[position[0]+sideDir*1, position[1]+1, OTHERSIDE(side)] == 0:
                 moves.remove((1,sideDir*1))
             
                 # en passant    
-                if board[position[0]+1, position[1], OTHERSIDE(side)] == PAWN and lastMove.x == position[0]+1 and lastMove.y == position[1]:
+                if board[position[0], position[1]+1, OTHERSIDE(side)] == PAWN and lastMove.x == position[0]+1 and lastMove.y == position[1]:
                     moves.add((1,sideDir*1))
 
         # if pawn hasnt moved yet: can move 2 pieces
         startPos = 1 if side==0 else 6
         # if pawn hasnt moved yet, space is not occupied, and piece can move 1 further already
         if position[0] == startPos and \
-            allIdInBoardRange(board, position[0], position[1]+sideDir*2, (0,1), 0) and \
+            allIdInBoardRange(board, position[0]+sideDir*2, position[1], (0,1), 0) and \
             (0,sideDir*1) in moves:
             moves.add((0, sideDir*2))
 
@@ -215,11 +215,11 @@ def filterDiagonally(board: numpy.ndarray, moves, position: tuple, side: int):
                             moves.remove((x*d1,x*d2))
                             continue
 
-                        if board[position[0]+x*d1, position[1]*x*d2, side] != 0:
+                        if board[position[0]+x*d2, position[1]*x*d1, side] != 0:
                             moves.remove((x*d1,x*d2))
                             blocked = True
 
-                        if board[position[0]+x*d1, position[1]*x*d2, OTHERSIDE(side)] != 0:
+                        if board[position[0]+x*d2, position[1]*x*d1, OTHERSIDE(side)] != 0:
                             blocked = True
         
     return moves
@@ -228,7 +228,8 @@ def filterStraight(board: numpy.ndarray, moves, position: tuple, side: int):
     blockedX = False
     blockedY = False
     for xOry in range(-7,8):
-        if (xOry,0) in moves:
+        # y-moves
+        if (0,xOry) in moves:
             if blockedX == True:
                 moves.remove((0,xOry))
                 continue
@@ -240,7 +241,8 @@ def filterStraight(board: numpy.ndarray, moves, position: tuple, side: int):
             if board[position[0]+xOry, position[1], OTHERSIDE(side)] != 0:
                 blockedX = True
 
-        if (0,xOry) in moves:
+        # x-moves
+        if (xOry,0) in moves:
             if blockedY == True:
                 moves.remove((0,xOry))
                 continue
@@ -281,15 +283,28 @@ def filterForCheckNextMove(board: numpy.ndarray, moves, position: tuple, side: i
     return moves2
 
 
-def allIdInBoardRange(board: numpy.ndarray, xRange, yRange, sideOneOrBoth, wantedId=0):
+def allIdInBoardRange(board: numpy.ndarray, yRange, xRange, sideOneOrBoth, wantedId=0):
     """ sideOneOrBoth: int -> one side, anything else -> both sides 
         xRange, yRange: tuple: range, anything else (int) -> the one int
     """
-    xRange = range(*xRange) if isinstance(xRange, tuple) else range(xRange, xRange+1)
-    yRange = range(*yRange) if isinstance(yRange, tuple) else range(yRange, yRange+1)
+    # testing
+    if isinstance(xRange, tuple):
+        xRange = range(xRange[0], xRange[1])
+    else:
+        xRange = range(xRange, xRange+1)
+    if isinstance(yRange, tuple):
+        yRange = range(yRange[0], yRange[1])
+    else:
+        yRange = range(yRange, yRange+1)
 
+    # xRange = range(*xRange) if isinstance(xRange, tuple) else range(xRange[0], xRange[0]+1)
+    # yRange = range(*yRange) if isinstance(yRange, tuple) else range(yRange[0], yRange[0]+1)
+
+    # testing
     for x in xRange:
+        print(f"x {x}")
         for y in yRange:
+            print(f"y {y}")
             if isinstance(sideOneOrBoth, int):
                 if board[x,y,sideOneOrBoth] != wantedId:
                     return False

@@ -140,12 +140,12 @@ class ChessBoard():
         ])
 
         rookPos = self.piecesPos[move.side][ROOK][rookIndex]
-        self.piecesPos[move.side][ROOK][rookIndex] = [rookPosAfter, primaryPieceRow]
+        self.piecesPos[move.side][ROOK][rookIndex] = [primaryPieceRow, rookPosAfter]
         self.board[rookPos[0], rookPos[1], move.side] = 0
-        self.board[rookPosAfter, primaryPieceRow, move.side] = ROOK
+        self.board[primaryPieceRow, rookPosAfter, move.side] = ROOK
 
     def handlePromotion(self, move: Move, piecePosIndex):
-        pieceId = PIECES_STR_TO_ID[move.original.split("=")[1]]
+        pieceId = PIECES_STR_TO_ID[move.original.split("=")[1].lower()]
         piecePos = self.piecesPos[move.side][PAWN][piecePosIndex]
         self.piecesPos[move.side][PAWN].pop(piecePosIndex)
         self.piecesPos[move.side][pieceId].append(piecePos)
