@@ -64,20 +64,20 @@ class ChessBoard():
 
         self.piecesPos = {
             0: {
-                KING: [[3,0]],
-                PAWN: [],
-                KNIGHT: [],
-                BISHOP: [],
-                ROOK: [],
-                QUEEN: []
+                KING: [[0,3]],
+                PAWN: [[1,x] for x in range(8)],
+                KNIGHT: [[0,1], [0,6]],
+                BISHOP: [[0,2], [0,5]],
+                ROOK: [[0,0], [0,7]],
+                QUEEN: [[0,4]]
             },
             1: {
-                KING: [[3,0]],
-                PAWN: [],
-                KNIGHT: [],
-                BISHOP: [],
-                ROOK: [],
-                QUEEN: []
+                KING: [[7,3]],
+                PAWN: [[6,x] for x in range(8)],
+                KNIGHT: [[7,1], [7,6]],
+                BISHOP: [[7,2], [7,5]],
+                ROOK: [[7,0], [7,7]],
+                QUEEN: [[7,4]]
             }
         }
 
@@ -100,8 +100,8 @@ class ChessBoard():
             currentPiecePos[piecePosIndex][0], currentPiecePos[piecePosIndex][1], move.side
         ] = 0
 
-        currentPiecePos[piecePosIndex][0] += move.x
-        currentPiecePos[piecePosIndex][1] += move.y
+        currentPiecePos[piecePosIndex][0] += move.y
+        currentPiecePos[piecePosIndex][1] += move.x
 
         toRemove = None
         for enemyPId, enemyPiecesPos in self.piecesPos[OTHERSIDE(move.side)].items():

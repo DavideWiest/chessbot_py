@@ -27,7 +27,7 @@ class Referee():
 
         legalMovesOfPiece = self.allLegalMoves.get((move.p, pieceNum), [])
  
-        return (position[0]+move.x, position[1]+move.y) in legalMovesOfPiece
+        return (position[0]+move.y, position[1]+move.x) in legalMovesOfPiece
 
     def isMatchFinished(self):
         return self.winner != None

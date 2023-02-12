@@ -56,7 +56,7 @@ class King(Figure):
             moves = filterForCheckNextMove(board, moves, position, side, piecesPos, pieceId, pieceNum)
 
         return [
-            (position[0]+x, position[1]+y) for x,y in moves
+            (position[0]+y, position[1]+x) for x,y in moves
         ]
 
 
@@ -86,7 +86,7 @@ class Queen(Figure):
             moves = filterForCheckNextMove(board, moves, position, side, piecesPos, pieceId, pieceNum)
 
         return [
-            (position[0]+x, position[1]+y) for x,y in moves
+            (position[0]+y, position[1]+x) for x,y in moves
         ]
 
 class Pawn(Figure):
@@ -135,7 +135,7 @@ class Pawn(Figure):
             moves = filterForCheckNextMove(board, moves, position, side, piecesPos, pieceId, pieceNum)
 
         return [
-            (position[0]+x, position[1]+y) for x,y in moves
+            (position[0]+y, position[1]+x) for x,y in moves
         ]
 
 class Knight(Figure):
@@ -157,7 +157,7 @@ class Knight(Figure):
             moves = filterForCheckNextMove(board, moves, position, side, piecesPos, pieceId, pieceNum)
 
         return [
-            (position[0]+x, position[1]+y) for x,y in moves
+            (position[0]+y, position[1]+x) for x,y in moves
         ]
 
 class Bishop(Figure):
@@ -179,7 +179,7 @@ class Bishop(Figure):
             moves = filterForCheckNextMove(board, moves, position, side, piecesPos, pieceId, pieceNum)
 
         return [
-            (position[0]+x, position[1]+y) for x,y in moves
+            (position[0]+y, position[1]+x) for x,y in moves
         ]
 
 class Rook(Figure):
@@ -202,7 +202,7 @@ class Rook(Figure):
             moves = filterForCheckNextMove(board, moves, position, side, piecesPos, pieceId, pieceNum)
 
         return [
-            (position[0]+x, position[1]+y) for x,y in moves
+            (position[0]+y, position[1]+x) for x,y in moves
         ]
 
 def filterDiagonally(board: numpy.ndarray, moves, position: tuple, side: int):
