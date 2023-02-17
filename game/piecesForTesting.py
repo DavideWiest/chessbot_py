@@ -3,6 +3,232 @@ import numpy
 from .move import *
 from .relations import *
 
+from string import ascii_uppercase
+
+
+class ChessBoard2():
+    """"
+    Chess board where all positions are stored
+    side is the respective player side (white = 1, black = 0)
+    """
+
+    def __init__(self):
+        "initialize board"
+
+        self.board = numpy.zeros((8,8,2), dtype=numpy.byte)
+
+        # 0 = black = on the bottom half
+        # 1 = white = on the top half
+        # will be switched upside down when viewing because x=0 is at the bottom in chess
+
+        # pawn row
+        self.board[1, :, BLACK] = PAWN
+
+        # rooks
+        self.board[0, 7, BLACK] = ROOK
+        self.board[0, 0, BLACK] = ROOK
+
+        # knights
+        self.board[0, 6, BLACK] = KNIGHT
+        self.board[0, 1, BLACK] = KNIGHT
+
+        # bishops
+        self.board[0, 5, BLACK] = BISHOP
+        self.board[0, 2, BLACK] = BISHOP
+
+        # queens
+        self.board[0, 4, BLACK] = QUEEN
+
+        # kings
+        self.board[0, 3, BLACK] = KING
+
+
+        # pawn row
+        self.board[6, :, WHITE] = PAWN
+
+        # rooks
+        self.board[7, 7, WHITE] = ROOK
+        self.board[7, 0, WHITE] = ROOK
+
+        # knights
+        self.board[7, 6, WHITE] = KNIGHT
+        self.board[7, 1, WHITE] = KNIGHT
+
+        # bishops
+        self.board[7, 5, WHITE] = BISHOP
+        self.board[7, 2, WHITE] = BISHOP
+
+        # queens
+        self.board[7, 4, WHITE] = QUEEN
+
+        # kings
+        self.board[7, 3, WHITE] = KING
+
+        self.piecesPos = {
+            0: {
+                KING: [[0,3]],
+                PAWN: [[1,x] for x in range(8)],
+                BISHOP: [[0,2], [0,5]],
+                ROOK: [[0,0], [0,7]],
+                QUEEN: [[0,4]],
+                KNIGHT: [[0,1], [0,6]]
+            },
+            1: {
+                KING: [[7,3]],
+                PAWN: [[6,x] for x in range(8)],
+                BISHOP: [[7,2], [7,5]],
+                ROOK: [[7,0], [7,7]],
+                QUEEN: [[7,4]],
+                KNIGHT: [[7,1], [7,6]]
+            }
+        }
+
+
+    def getBoard(self, dim: int = 1):
+        "get the board either 1 or 2 dimensional"
+
+        assert dim in (1,2)
+
+        # to implement
+
+    
+    def makeMove(self, piecePos: tuple, move: Move):
+        "move piece"
+
+        currentPiecePos = self.piecesPos[move.side][move.p]
+        piecePosIndex = currentPiecePos.index(list(piecePos))
+
+        self.board[
+            currentPiecePos[piecePosIndex][0], currentPiecePos[piecePosIndex][1], move.side
+        ] = 0
+
+        currentPiecePos[piecePosIndex][0] += move.y
+        currentPiecePos[piecePosIndex][1] += move.x
+
+        toRemove = None
+        for enemyPId, enemyPiecesPos in self.piecesPos[OTHERSIDE(move.side)].items():
+            for enemyPiecePos in enemyPiecesPos:
+                if enemyPiecePos == currentPiecePos[piecePosIndex]:
+                    toRemove = (enemyPId, enemyPiecesPos.index(enemyPiecePos))
+                    break
+
+        if toRemove != None:
+            self.piecesPos[OTHERSIDE(move.side)][toRemove[0]].pop(toRemove[1])
+            self.board[
+                currentPiecePos[piecePosIndex][0],
+                currentPiecePos[piecePosIndex][1],
+                OTHERSIDE(move.side)
+            ] = 0
+
+        # castling
+
+        if move.original.lower() == "o-o":
+            self.handleCastling(move, 0, 2)
+            
+        elif move.original.lower() == "o-o-o":
+            self.handleCastling(move, 7, 5)
+
+        # promoting
+        elif "=" in move.original:
+            self.handlePromotion(move, piecePosIndex)
+
+        return True
+
+    def handleCastling(self, move: Move, rookPosBefore: int, rookPosAfter: int):
+        primaryPieceRow = 0 if move.side == 0 else 7
+        rookIndex = self.piecesPos[move.side][ROOK].index([
+            rookPosBefore, primaryPieceRow
+        ])
+
+        rookPos = self.piecesPos[move.side][ROOK][rookIndex]
+        self.piecesPos[move.side][ROOK][rookIndex] = [primaryPieceRow, rookPosAfter]
+        self.board[rookPos[0], rookPos[1], move.side] = 0
+        self.board[primaryPieceRow, rookPosAfter, move.side] = ROOK
+
+    def handlePromotion(self, move: Move, piecePosIndex):
+        pieceId = PIECES_STR_TO_ID[move.original.split("=")[1].lower()]
+        piecePos = self.piecesPos[move.side][PAWN][piecePosIndex]
+        self.piecesPos[move.side][PAWN].pop(piecePosIndex)
+        self.piecesPos[move.side][pieceId].append(piecePos)
+        self.board[piecePos[0], piecePos[1], move.side] = pieceId
+
+    def __repr__(self):
+        return self.__str__()
+
+    def __str__(self):
+        rows = []
+
+        for rowindex in range(8):
+            # rows.append(f"{8-rowindex}   " + "   ".join(
+            rows.append(f"{rowindex}   " + "   ".join(
+                str(
+                    self.preparePiece(self.board[rowindex, colindex, 0], 0)
+                    if self.board[rowindex, colindex, 0] != 0 
+                    else self.preparePiece(self.board[rowindex, colindex, 1], 1)
+                )
+                for colindex in range(8)
+                ))
+        # rows.append(
+        #     "    " + "   ".join([f"{ascii_uppercase[i]}" for i in range(8)])
+        # )
+        rows.append(
+            "    " + "   ".join([f"{i}" for i in range(8)])
+        )
+
+        return "\n\n".join(rows)
+
+    def preparePiece(self, pieceId: int, side: int, testPieceId=None):
+        if pieceId == 0:
+            return Style.DIM + Fore.LIGHTWHITE_EX +  "_"  + Fore.RESET + Style.RESET_ALL
+        if pieceId == testPieceId:
+            return TEST_COLOR + "T" + Fore.RESET
+        return COLOR_SIDE(side) + PIECES_ID_TO_STR[pieceId].upper() + Fore.RESET
+
+    def visualizeLegalMoves(self, pieceId: int, startPos: tuple=(4,4), level: int=2):
+        
+        newBoard = numpy.zeros((8,8,2), dtype=numpy.byte)
+
+        newBoard[startPos[0], startPos[1],0] = pieceId
+
+        newPiecesPos = {
+            0: {KING: [], PAWN: [], BISHOP: [], ROOK: [], QUEEN: [], KNIGHT: []},
+            1: {KING: [], PAWN: [], BISHOP: [], ROOK: [], QUEEN: [], KNIGHT: []}
+        }
+
+        newPiecesPos[0][pieceId].append([4,4])
+
+        #### edit board and piecePos
+        newBoard[:, 3, 1] = 1
+        newBoard[:, 6, 1] = 1
+
+        ####
+
+        legalMoves = PIECES_ID_TO_CLASS[pieceId].getLegalMoves(newBoard, startPos, 0, newPiecesPos, pieceId, 0, level)
+
+        for x, y in legalMoves:
+            newBoard[x,y,1] = 12
+
+        rows = []
+
+        for rowindex in range(8):
+            # rows.append(f"{8-rowindex}   " + "   ".join(
+            rows.append(f"{rowindex}   " + "   ".join(
+                str(
+                    self.preparePiece(newBoard[rowindex, colindex, 0], 0, 12)
+                    if newBoard[rowindex, colindex, 0] != 0 
+                    else self.preparePiece(newBoard[rowindex, colindex, 1], 1, 12)
+                )
+                for colindex in range(8)
+                ))
+        # rows.append(
+        #     "    " + "   ".join([f"{ascii_uppercase[i]}" for i in range(8)])
+        # )
+        rows.append(
+            "    " + "   ".join([f"{i}" for i in range(8)])
+        )
+
+        print("\n\n".join(rows))
+
 class Figure():
     """
     Chess figure
@@ -80,8 +306,8 @@ class Queen(Figure):
 
         # sort out moves that are blocked
 
-        moves = filterStraight(board, moves, position, side)
-        moves = filterDiagonally(board, moves, position, side)
+        moves = filterStraight(board, moves, position, side, level)
+        moves = filterDiagonally(board, moves, position, side, level)
 
         if level == 1:
             moves = filterForCheckNextMove(board, moves, position, side, piecesPos, pieceId, pieceIndex)
@@ -174,7 +400,7 @@ class Bishop(Figure):
 
         moves = self.getLegalMovesByBoard(board, position, side)
 
-        moves = filterDiagonally(board, moves, position, side)
+        moves = filterDiagonally(board, moves, position, side, level)
 
         if level == 1:
             moves = filterForCheckNextMove(board, moves, position, side, piecesPos, pieceId, pieceIndex)
@@ -197,7 +423,7 @@ class Rook(Figure):
 
         moves = self.getLegalMovesByBoard(board, position, side)
 
-        moves = filterStraight(board, moves, position, side)
+        moves = filterStraight(board, moves, position, side, level)
 
         if level == 1:
             moves = filterForCheckNextMove(board, moves, position, side, piecesPos, pieceId, pieceIndex)
@@ -206,7 +432,11 @@ class Rook(Figure):
             (position[0]+y, position[1]+x) for x,y in moves
         ]
 
-def filterDiagonally(board: numpy.ndarray, moves, position: tuple, side: int):
+def filterDiagonally(board: numpy.ndarray, moves, position: tuple, side: int, level: int=0):
+    if level==2:
+        board2 = ChessBoard2()
+        board2.visualizeLegalMoves(board[position[0], position[1], side], position, level+1)
+
     for d1 in [-1,1]:
             for d2 in [-1,1]:
                 blocked = False
@@ -225,7 +455,11 @@ def filterDiagonally(board: numpy.ndarray, moves, position: tuple, side: int):
 
     return moves
 
-def filterStraight(board: numpy.ndarray, moves, position: tuple, side: int):
+def filterStraight(board: numpy.ndarray, moves, position: tuple, side: int, level: int=0):
+    if level==2:
+        board2 = ChessBoard2()
+        board2.visualizeLegalMoves(board[position[0], position[1], side], position, level+1)
+
     blockedX = False
     blockedY = False
     for xOry in range(-7,8):
@@ -236,7 +470,7 @@ def filterStraight(board: numpy.ndarray, moves, position: tuple, side: int):
                 continue
 
             if board[position[0]+xOry, position[1], side] != 0:
-                moves.remove(((xOry,0)))
+                moves.remove(((0,xOry)))
                 blockedX = True
 
             if board[position[0]+xOry, position[1], OTHERSIDE(side)] != 0:
@@ -245,11 +479,11 @@ def filterStraight(board: numpy.ndarray, moves, position: tuple, side: int):
         # x-moves
         if (xOry,0) in moves:
             if blockedY == True:
-                moves.remove((0,xOry))
+                moves.remove((xOry, 0))
                 continue
 
             if board[position[0], position[1]+xOry, side] != 0:
-                moves.remove(((0,xOry)))
+                moves.remove(((xOry, 0)))
                 blockedY = True
 
             if board[position[0], position[1]+xOry, OTHERSIDE(side)] != 0:
@@ -328,6 +562,19 @@ def allIdInBoardRange(board: numpy.ndarray, yRange, xRange, sideOneOrBoth, wante
     return True
 
 
+BLACK = 0
+WHITE = 1
+
+OTHERSIDE = lambda side: WHITE if side==BLACK else BLACK
+DIRECTION = lambda side: 1 if side==BLACK else -1
+
+KING = 2
+PAWN = 1
+KNIGHT = 3
+BISHOP = 4
+ROOK = 5
+QUEEN = 9
+
 PIECES_ID_TO_CLASS = {
     KING: King(),
     PAWN: Pawn(),
@@ -336,3 +583,23 @@ PIECES_ID_TO_CLASS = {
     ROOK: Rook(),
     QUEEN: Queen()
 }
+
+PIECES_CLASS_TO_ID = {
+    "King": KING,
+    "Pawn": PAWN,
+    "Knight": KNIGHT,
+    "Bishop": BISHOP,
+    "Rook": ROOK,
+    "Queen": QUEEN 
+}
+
+PIECES_STR_TO_ID = {
+    "k": KING,
+    "p": PAWN,
+    "n": KNIGHT,
+    "b": BISHOP,
+    "r": ROOK,
+    "q": QUEEN
+}
+
+PIECES_ID_TO_STR = {v: k for k, v in PIECES_STR_TO_ID.items()}

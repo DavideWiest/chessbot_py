@@ -1,6 +1,8 @@
 import game
 from string import ascii_lowercase
 
+from .relations import *
+
 class Move():
 
     def __init__(self, move: str, side: int, piecePosition: tuple):
@@ -88,25 +90,3 @@ def convertToStrMoveXY(moveXY: tuple, p: int = 0):
             x = p+x
 
     return x+y
-
-KING = 10
-PAWN = 1
-KNIGHT = 3
-BISHOP = 4
-ROOK = 5
-QUEEN = 9
-
-PIECES_STR_TO_ID = {
-    "k": KING,
-    "p": PAWN,
-    "n": KNIGHT,
-    "b": BISHOP,
-    "r": ROOK,
-    "q": QUEEN
-}
-
-PIECES_ID_TO_STR = {v: k for k, v in PIECES_STR_TO_ID.items()}
-
-PAWN_PROMOTION_OPTIONS = [
-    "n", "b", "r", "q"
-]

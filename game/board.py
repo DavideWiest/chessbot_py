@@ -156,16 +156,15 @@ class ChessBoard():
         return self.__str__()
 
     def __str__(self):
-
         rows = []
 
         for rowindex in range(8):
             # rows.append(f"{8-rowindex}   " + "   ".join(
             rows.append(f"{rowindex}   " + "   ".join(
                 str(
-                    self.preparePiece(self.board[rowindex][colindex][0], 0)
-                    if self.board[rowindex][colindex][0] != 0 
-                    else self.preparePiece(self.board[rowindex][colindex][1], 1)
+                    self.preparePiece(self.board[rowindex, colindex, 0], 0)
+                    if self.board[rowindex, colindex, 0] != 0 
+                    else self.preparePiece(self.board[rowindex, colindex, 1], 1)
                 )
                 for colindex in range(8)
                 ))
@@ -178,11 +177,9 @@ class ChessBoard():
 
         return "\n\n".join(rows)
 
-    def preparePiece(self, pieceId: int, side: int):
+    def preparePiece(self, pieceId: int, side: int, testPieceId=None):
         if pieceId == 0:
             return Style.DIM + Fore.LIGHTWHITE_EX +  "_"  + Fore.RESET + Style.RESET_ALL
-        return (
-            Fore.GREEN + PIECES_ID_TO_STR[pieceId].upper() + Fore.RESET 
-            if side == 0 
-            else Fore.YELLOW + PIECES_ID_TO_STR[pieceId].upper() + Fore.RESET
-        )
+        if pieceId == testPieceId:
+            return TEST_COLOR + "T" + Fore.RESET
+        return COLOR_SIDE(side) + PIECES_ID_TO_STR[pieceId].upper() + Fore.RESET
