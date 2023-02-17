@@ -212,8 +212,8 @@ class ChessBoard2():
         newBoard[startPos[0], startPos[1],0] = pieceId
 
         newPiecesPos = {
-            0: {KING: [], PAWN: [], BISHOP: [], ROOK: [], QUEEN: [], KNIGHT: []},
-            1: {KING: [], PAWN: [(3,x) for x in range(0,8)]+[(6,x) for x in range(0,8)], BISHOP: [], ROOK: [], QUEEN: [], KNIGHT: []}
+            0: {KING: [[2,2]], PAWN: [], BISHOP: [], ROOK: [], QUEEN: [], KNIGHT: []},
+            1: {KING: [], PAWN: [[3,x] for x in range(0,8)]+[[6,x] for x in range(0,8)], BISHOP: [], ROOK: [], QUEEN: [], KNIGHT: []}
         }
 
         newBoardInfo = {
@@ -226,8 +226,9 @@ class ChessBoard2():
         newPiecesPos[0][pieceId].append([4,4])
 
         #### edit board and piecePos
-        newBoard[3, :, 1] = 1
-        newBoard[6, :, 1] = 1
+        newBoard[3, :, 1] = PAWN
+        newBoard[6, :, 1] = PAWN
+        newBoard[2, 2, 0] = KING
         # newBoard[5,4,1] = 1
         ####
 
@@ -385,7 +386,7 @@ class Pawn(Figure):
         startPos = 1 if side==0 else 6
         # if pawn hasnt moved yet, space is not occupied, and piece can move 1 further already
         if position[0] == startPos and \
-            allIdInBoardRange(board, position[0]+sideDir*2, position[1], (0,1), 0) and \
+            np.all(board[position[0]+sideDir*2, position[1], :] == 0) and \
             (0,sideDir*1) in moves:
             moves.append((0, sideDir*2))
 
@@ -585,8 +586,8 @@ def filterForCheckNextMove(board: np.ndarray, moves, position: tuple, side: int,
         board2[position[0], position[1], side] = pieceId
         board2[position[0], position[1], OTHERSIDE(side)] = 0
 
-        cb = ChessBoard2()
-        print(cb.toString(board2))
+        # cb = ChessBoard2()
+        # print(cb.toString(board2))
 
         boardInfo2 = updateBoardInfo(board2, boardInfo.copy(), side, piecesPos, pieceId, pieceIndex, previousPosition)
 
@@ -597,17 +598,15 @@ def filterForCheckNextMove(board: np.ndarray, moves, position: tuple, side: int,
             # print(enemypieceIndex)
             enemyPieceMoves = PIECES_ID_TO_CLASS[pieceId2].getLegalMoves(board2, tuple(piecesPosCopy[OTHERSIDE(side)][pieceId2][enemypieceIndex]), OTHERSIDE(side), piecesPosCopy, pieceId2, enemypieceIndex, boardInfo2, level=level+1)
 
-            if piecesPosCopy[side][KING][0] in enemyPieceMoves:
+            if tuple(piecesPosCopy[side][KING][0]) in enemyPieceMoves:
                 canTakeThisMove = False
         
         if canTakeThisMove:
             moves2.append(move)
             # print("----")
-        print("---------")
-
+        # print("------")
 
     return moves2
-
 
 def allIdInBoardRange(board: np.ndarray, yRange, xRange, sideOneOrBoth, wantedId=0):
     """ sideOneOrBoth: int -> one side, anything else -> both sides 

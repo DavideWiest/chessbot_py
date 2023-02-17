@@ -11,8 +11,10 @@ class Figure():
     moveDirections = Change in x,y position of the figure, third element = if piece needs to be
     """
 
-    def getLegalMovesByBoard(self, board: np.ndarray, position: tuple, side: int):
+    def getLegalMovesByBoard(self, board: np.ndarray, position: tuple, side: int, directionMul=1):
         allmoves = self.allMoves.copy()
+        if directionMul != 1:
+            allmoves = [(x,directionMul*y) for x,y in allmoves]
         allmoves2 = [
             (x,y) for x,y in allmoves if 0 <= position[0]+y < 8 and 0 <= position[1]+x < 8
         ]
@@ -105,13 +107,10 @@ class Pawn(Figure):
 
     def getLegalMoves(self, board: np.ndarray, position: tuple, side: int, piecesPos: dict, pieceId: int, pieceIndex: int, boardInfo: dict, level: int=1):
 
-        moves = self.getLegalMovesByBoard(board, position, side)
+        sideDir = DIRECTION(side)
+        moves = self.getLegalMovesByBoard(board, position, side, sideDir)
 
         # pawns can only move downwards if side == white else only upwards
-        sideDir = DIRECTION(side)
-        moves = [
-            (x,sideDir*y) for x,y in moves
-        ]
 
         if (-1,sideDir*1) in moves:
             if board[position[0]+sideDir*1, position[1]-1, OTHERSIDE(side)] == 0:
@@ -136,7 +135,7 @@ class Pawn(Figure):
         startPos = 1 if side==0 else 6
         # if pawn hasnt moved yet, space is not occupied, and piece can move 1 further already
         if position[0] == startPos and \
-            allIdInBoardRange(board, position[0]+sideDir*2, position[1], (0,1), 0) and \
+            np.all(board[position[0]+sideDir*2, position[1], :] == 0) and \
             (0,sideDir*1) in moves:
             moves.append((0, sideDir*2))
 
@@ -312,12 +311,11 @@ def filterForCheckNextMove(board: np.ndarray, moves, position: tuple, side: int,
 
 
         piecesPosCopy = piecesPos.copy()
-        # # testing
-        # # print("PID 5")
-        # # print(piecesPosCopy)
-        # # print(side)
-        # # print(pieceId)
-        # # print(pieceIndex)
+        # print("--")
+        # print(piecesPosCopy[side][pieceId])
+        # print(pieceId)
+        # print(pieceIndex)
+        # print("--")
         previousPosition = piecesPosCopy[side][pieceId][pieceIndex]
         piecesPosCopy[side][pieceId][pieceIndex] = position
 
@@ -329,15 +327,20 @@ def filterForCheckNextMove(board: np.ndarray, moves, position: tuple, side: int,
 
         boardInfo2 = updateBoardInfo(board2, boardInfo.copy(), side, piecesPos, pieceId, pieceIndex, previousPosition)
 
-        # print(allEnemyPieces)
 
-        for pieceId, enemypieceIndex in allEnemyPieces:
+        canTakeThisMove = True
+        for pieceId2, enemypieceIndex in allEnemyPieces:
             # print(pieceId)
             # print(enemypieceIndex)
-            if not any(pieceMovePos == piecesPosCopy[side][KING][0] for pieceMovePos in PIECES_ID_TO_CLASS[pieceId].getLegalMoves(board, tuple(piecesPosCopy[OTHERSIDE(side)][pieceId][enemypieceIndex]), OTHERSIDE(side), piecesPosCopy, pieceId, enemypieceIndex, boardInfo2, level=2)):
-                moves2.append(move)
+            enemyPieceMoves = PIECES_ID_TO_CLASS[pieceId2].getLegalMoves(board2, tuple(piecesPosCopy[OTHERSIDE(side)][pieceId2][enemypieceIndex]), OTHERSIDE(side), piecesPosCopy, pieceId2, enemypieceIndex, boardInfo2, level=2)
+
+            if tuple(piecesPosCopy[side][KING][0]) in enemyPieceMoves:
+                canTakeThisMove = False
+        
+        if canTakeThisMove:
+            moves2.append(move)
             # print("----")
-        # print("---------")
+        # print("------")
 
 
     return moves2

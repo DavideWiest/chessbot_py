@@ -10,7 +10,7 @@ class Referee():
         self.allLegalMoves = {}
         pass
 
-    def computeAllLegalMoves(self, board: ChessBoard, side: int, lastMove: Move):
+    def computeAllLegalMoves(self, board: ChessBoard, side: int):
         self.allLegalMoves = {}
         for pieceId in board.piecesPos[side]:
             # testing
@@ -22,8 +22,10 @@ class Referee():
                 
                 self.allLegalMoves[(pieceId, pieceIndex)] = PIECES_ID_TO_CLASS[pieceId].getLegalMoves(board.board, tuple(piecePos), side, board.piecesPos, pieceId, pieceIndex, board.boardInfo)
     
-                print(pieceId)
-                print(self.allLegalMoves[(pieceId, pieceIndex)])
+                print(PIECES_ID_TO_STR[pieceId])
+                print(len(self.allLegalMoves[(pieceId, pieceIndex)]))
+                print(len(set(self.allLegalMoves[(pieceId, pieceIndex)])))
+                print("----")
 
         if sum(len(pieceMoves) for pieceMoves in self.allLegalMoves.values()):
             self.winner = "black" if side == "white" else "white"

@@ -8,4 +8,4 @@ from game.referee import *
 board = ChessBoard2()
 
 # board.visualizeLegalMoves(2)
-board.visualizeLegalMoves(2)
+board.visualizeLegalMoves(9, level=1)
