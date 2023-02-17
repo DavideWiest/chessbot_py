@@ -3,3 +3,5 @@ numpy indexing issues
 implement boardInfo (as arg to getLegalMoves)
 
 remove referee print statements (when done)
+
+check for function symmetry in pawn and king

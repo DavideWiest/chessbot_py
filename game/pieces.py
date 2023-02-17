@@ -118,7 +118,7 @@ class Pawn(Figure):
                 moves.remove((-1,sideDir*1))
 
                 # en passant
-                if board[position[0], position[1]-1, OTHERSIDE(side)] == PAWN and boardInfo["lastMovePos"][1] == position[1]-1 and boardInfo["lastMovePos"][0] == position[1]:
+                if board[position[0], position[1]-1, OTHERSIDE(side)] == PAWN and boardInfo["lastMovePos"][1] == position[1]-1 and boardInfo["lastMovePos"][0] == position[0]:
                     moves.append((1,sideDir*1))
 
         if (1,sideDir*1) in moves:
@@ -126,7 +126,7 @@ class Pawn(Figure):
                 moves.remove((1,sideDir*1))
             
                 # en passant    
-                if board[position[0], position[1]+1, OTHERSIDE(side)] == PAWN and boardInfo["lastMovePos"][1] == position[1]+1 and boardInfo["lastMovePos"][0] == position[1]:
+                if board[position[0], position[1]+1, OTHERSIDE(side)] == PAWN and boardInfo["lastMovePos"][1] == position[1]+1 and boardInfo["lastMovePos"][0] == position[0]:
                     moves.append((1,sideDir*1))
 
         if np.any(board[position[0]+sideDir*1, position[1], OTHERSIDE(side)] != 0):
