@@ -19,10 +19,9 @@ class Referee():
             for pieceIndex, piecePos in enumerate(board.piecesPos[side][pieceId]):
                 # print("PIN")
                 # print(pieceIndex)
-                if pieceId == PAWN:
-                    self.allLegalMoves[(pieceId, pieceIndex)] = PIECES_ID_TO_CLASS[pieceId].getLegalMoves(board.board, tuple(piecePos), side, board.piecesPos, pieceId, pieceIndex, lastMove)
-                else:
-                    self.allLegalMoves[(pieceId, pieceIndex)] = PIECES_ID_TO_CLASS[pieceId].getLegalMoves(board.board, tuple(piecePos), side, board.piecesPos, pieceId, pieceIndex)
+                
+                self.allLegalMoves[(pieceId, pieceIndex)] = PIECES_ID_TO_CLASS[pieceId].getLegalMoves(board.board, tuple(piecePos), side, board.piecesPos, pieceId, pieceIndex, board.boardInfo)
+    
                 print(pieceId)
                 print(self.allLegalMoves[(pieceId, pieceIndex)])
 

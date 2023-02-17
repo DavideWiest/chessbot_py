@@ -1,6 +1,7 @@
 from .pieces import *
 from .move import *
-import numpy
+import numpy as np
+from .boardfuncs import updateBoardInfo
 
 from string import ascii_uppercase
 from colorama import Fore, Back, Style
@@ -15,7 +16,13 @@ class ChessBoard():
     def __init__(self):
         "initialize board"
 
-        self.board = numpy.zeros((8,8,2), dtype=numpy.byte)
+        self.board = np.zeros((8,8,2), dtype=np.byte)
+        self.boardInfo = {
+            "lastMovePos": (-1, -1),
+            "kingMoved": False,
+            "firstRookMoved": False,
+            "secondRookMoved": False
+        }
 
         # 0 = black = on the bottom half
         # 1 = white = on the top half
@@ -97,6 +104,7 @@ class ChessBoard():
 
         currentPiecePos = self.piecesPos[move.side][move.p]
         piecePosIndex = currentPiecePos.index(list(piecePos))
+        previousPosition = currentPiecePos[piecePosIndex]
 
         self.board[
             currentPiecePos[piecePosIndex][0], currentPiecePos[piecePosIndex][1], move.side
@@ -104,6 +112,9 @@ class ChessBoard():
 
         currentPiecePos[piecePosIndex][0] += move.y
         currentPiecePos[piecePosIndex][1] += move.x
+
+        piecePos[move.side][move.p][piecePosIndex][0] += move.y
+        piecePos[move.side][move.p][piecePosIndex][1] += move.x
 
         toRemove = None
         for enemyPId, enemyPiecesPos in self.piecesPos[OTHERSIDE(move.side)].items():
@@ -131,6 +142,8 @@ class ChessBoard():
         # promoting
         elif "=" in move.original:
             self.handlePromotion(move, piecePosIndex)
+
+        self.boardInfo = updateBoardInfo(self.board, self.boardInfo, move.side, move.p, piecePosIndex)
 
         return True
 

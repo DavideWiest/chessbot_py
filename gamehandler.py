@@ -17,7 +17,6 @@ class GameHandler():
 
     def run(self):
         
-        self.lastMove = None
         self.index = 1
 
         # to implement 
@@ -31,7 +30,7 @@ class GameHandler():
         currentPlayer, currentPlayerStr = (playerWhite, "white") if self.index % 2 == 1 else (playerBlack, "black")
         print(f"Move {self.index} - {currentPlayerStr.capitalize()}'s turn \n\n")
 
-        self.referee.computeAllLegalMoves(self.board, currentPlayer.side, self.lastMove)
+        self.referee.computeAllLegalMoves(self.board, currentPlayer.side)
 
         if currentPlayer.needsAllLegalMoves:
             piecesPosIndex, piecePos, move = currentPlayer.getMove(self.board, self.referee.allLegalMoves)
@@ -49,7 +48,7 @@ class GameHandler():
 
         self.board.makeMove(piecePos, move)
 
-        self.lastMove = move
+        self.board.boardInfo["lastMovePos"] = (move.y, move.x)
 
 if __name__ == "__main__":
     # run game

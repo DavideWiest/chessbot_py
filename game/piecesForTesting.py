@@ -1,7 +1,9 @@
-import numpy
+import numpy as np
+
 
 from .move import *
 from .relations import *
+from .boardfuncs import updateBoardInfo
 
 from string import ascii_uppercase
 
@@ -15,7 +17,7 @@ class ChessBoard2():
     def __init__(self):
         "initialize board"
 
-        self.board = numpy.zeros((8,8,2), dtype=numpy.byte)
+        self.board = np.zeros((8,8,2), dtype=np.byte)
 
         # 0 = black = on the bottom half
         # 1 = white = on the top half
@@ -97,6 +99,7 @@ class ChessBoard2():
 
         currentPiecePos = self.piecesPos[move.side][move.p]
         piecePosIndex = currentPiecePos.index(list(piecePos))
+        previousPosition = currentPiecePos[piecePosIndex]
 
         self.board[
             currentPiecePos[piecePosIndex][0], currentPiecePos[piecePosIndex][1], move.side
@@ -104,6 +107,9 @@ class ChessBoard2():
 
         currentPiecePos[piecePosIndex][0] += move.y
         currentPiecePos[piecePosIndex][1] += move.x
+
+        piecePos[move.side][move.p][piecePosIndex][0] += move.y
+        piecePos[move.side][move.p][piecePosIndex][1] += move.x
 
         toRemove = None
         for enemyPId, enemyPiecesPos in self.piecesPos[OTHERSIDE(move.side)].items():
@@ -132,6 +138,16 @@ class ChessBoard2():
         elif "=" in move.original:
             self.handlePromotion(move, piecePosIndex)
 
+        self.boardInfo["lastMovePos"] = piecePos[move.side][move.p][piecePosIndex]
+
+        rookStartPosY = 0 if move.side==0 else 7
+
+        if move.p == ROOK:
+            if previousPosition == self.board[rookStartPosY, 0, move.side] == ROOK:
+                self.boardInfo["firstRookMoved"] = True
+            elif previousPosition == self.board[rookStartPosY, 7, move.side] == ROOK:
+                self.boardInfo["secondRookMoved"] = True
+
         return True
 
     def handleCastling(self, move: Move, rookPosBefore: int, rookPosAfter: int):
@@ -156,15 +172,20 @@ class ChessBoard2():
         return self.__str__()
 
     def __str__(self):
+        return self.toString()
+
+    def toString(self, board=None):
+        if board is None:
+            board = self.board
         rows = []
 
         for rowindex in range(8):
             # rows.append(f"{8-rowindex}   " + "   ".join(
             rows.append(f"{rowindex}   " + "   ".join(
                 str(
-                    self.preparePiece(self.board[rowindex, colindex, 0], 0)
-                    if self.board[rowindex, colindex, 0] != 0 
-                    else self.preparePiece(self.board[rowindex, colindex, 1], 1)
+                    self.preparePiece(board[rowindex, colindex, 0], 0)
+                    if board[rowindex, colindex, 0] != 0 
+                    else self.preparePiece(board[rowindex, colindex, 1], 1)
                 )
                 for colindex in range(8)
                 ))
@@ -186,24 +207,31 @@ class ChessBoard2():
 
     def visualizeLegalMoves(self, pieceId: int, startPos: tuple=(4,4), level: int=2):
         
-        newBoard = numpy.zeros((8,8,2), dtype=numpy.byte)
+        newBoard = np.zeros((8,8,2), dtype=np.byte)
 
         newBoard[startPos[0], startPos[1],0] = pieceId
 
         newPiecesPos = {
             0: {KING: [], PAWN: [], BISHOP: [], ROOK: [], QUEEN: [], KNIGHT: []},
-            1: {KING: [], PAWN: [], BISHOP: [], ROOK: [], QUEEN: [], KNIGHT: []}
+            1: {KING: [], PAWN: [(3,x) for x in range(0,8)]+[(6,x) for x in range(0,8)], BISHOP: [], ROOK: [], QUEEN: [], KNIGHT: []}
+        }
+
+        newBoardInfo = {
+            "lastMovePos": (-1, -1),
+            "kingMoved": False,
+            "firstRookMoved": False,
+            "secondRookMoved": False
         }
 
         newPiecesPos[0][pieceId].append([4,4])
 
         #### edit board and piecePos
-        newBoard[:, 3, 1] = 1
-        newBoard[:, 6, 1] = 1
-
+        newBoard[3, :, 1] = 1
+        newBoard[6, :, 1] = 1
+        # newBoard[5,4,1] = 1
         ####
 
-        legalMoves = PIECES_ID_TO_CLASS[pieceId].getLegalMoves(newBoard, startPos, 0, newPiecesPos, pieceId, 0, level)
+        legalMoves = PIECES_ID_TO_CLASS[pieceId].getLegalMoves(newBoard, startPos, 0, newPiecesPos, pieceId, 0, newBoardInfo, level)
 
         for x, y in legalMoves:
             newBoard[x,y,1] = 12
@@ -236,7 +264,7 @@ class Figure():
     moveDirections = Change in x,y position of the figure, third element = if piece needs to be
     """
 
-    def getLegalMovesByBoard(self, board: numpy.ndarray, position: tuple, side: int):
+    def getLegalMovesByBoard(self, board: np.ndarray, position: tuple, side: int):
         allmoves = self.allMoves.copy()
         allmoves2 = [
             (x,y) for x,y in allmoves if 0 <= position[0]+y < 8 and 0 <= position[1]+x < 8
@@ -259,7 +287,7 @@ class King(Figure):
         while (0,0) in self.allMoves:
             self.allMoves.remove((0,0))
 
-    def getLegalMoves(self, board: numpy.ndarray, position: tuple, side: int, piecesPos: dict, pieceId: int, pieceIndex: int, level: int=1):
+    def getLegalMoves(self, board: np.ndarray, position: tuple, side: int, piecesPos: dict, pieceId: int, pieceIndex: int, boardInfo: dict, level: int=1):
 
         # to implement
 
@@ -279,8 +307,8 @@ class King(Figure):
             allIdInBoardRange(board, startPos[0], (4,7), (0,1), 0):
             moves.append((startPos[0], 6))
 
-        if level == 1:
-            moves = filterForCheckNextMove(board, moves, position, side, piecesPos, pieceId, pieceIndex)
+        if level<=2: # for tests only
+            moves = filterForCheckNextMove(board, moves, position, side, piecesPos, pieceId, pieceIndex, boardInfo, level)
 
         return [
             (position[0]+y, position[1]+x) for x,y in moves
@@ -300,7 +328,7 @@ class Queen(Figure):
         while (0,0) in self.allMoves:
             self.allMoves.remove((0,0))
 
-    def getLegalMoves(self, board: numpy.ndarray, position: tuple, side: int, piecesPos: dict, pieceId: int, pieceIndex: int, level: int=1):
+    def getLegalMoves(self, board: np.ndarray, position: tuple, side: int, piecesPos: dict, pieceId: int, pieceIndex: int, boardInfo: dict, level: int=1):
 
         moves = self.getLegalMovesByBoard(board, position, side)
 
@@ -310,7 +338,7 @@ class Queen(Figure):
         moves = filterDiagonally(board, moves, position, side, level)
 
         if level == 1:
-            moves = filterForCheckNextMove(board, moves, position, side, piecesPos, pieceId, pieceIndex)
+            moves = filterForCheckNextMove(board, moves, position, side, piecesPos, pieceId, pieceIndex, boardInfo)
 
         return [
             (position[0]+y, position[1]+x) for x,y in moves
@@ -324,7 +352,7 @@ class Pawn(Figure):
         while (0,0) in self.allMoves:
             self.allMoves.remove((0,0))
 
-    def getLegalMoves(self, board: numpy.ndarray, position: tuple, side: int, piecesPos: dict, pieceId: int, pieceIndex: int, level: int=1, lastMove: Move = (-1,-1)):
+    def getLegalMoves(self, board: np.ndarray, position: tuple, side: int, piecesPos: dict, pieceId: int, pieceIndex: int, boardInfo: dict, level: int=1):
 
         moves = self.getLegalMovesByBoard(board, position, side)
 
@@ -339,7 +367,7 @@ class Pawn(Figure):
                 moves.remove((-1,sideDir*1))
 
                 # en passant
-                if board[position[0], position[1]-1, OTHERSIDE(side)] == PAWN and lastMove.x == position[0]+1 and lastMove.y == position[1]:
+                if board[position[0], position[1]-1, OTHERSIDE(side)] == PAWN and boardInfo["lastMovePos"][1] == position[1]-1 and boardInfo["lastMovePos"][0] == position[1]:
                     moves.append((1,sideDir*1))
 
         if (1,sideDir*1) in moves:
@@ -347,8 +375,11 @@ class Pawn(Figure):
                 moves.remove((1,sideDir*1))
             
                 # en passant    
-                if board[position[0], position[1]+1, OTHERSIDE(side)] == PAWN and lastMove.x == position[0]+1 and lastMove.y == position[1]:
+                if board[position[0], position[1]+1, OTHERSIDE(side)] == PAWN and boardInfo["lastMovePos"][1] == position[1]+1 and boardInfo["lastMovePos"][0] == position[1]:
                     moves.append((1,sideDir*1))
+
+        if np.any(board[position[0]+sideDir*1, position[1], OTHERSIDE(side)] != 0):
+            moves.remove((0,sideDir*1))
 
         # if pawn hasnt moved yet: can move 2 pieces
         startPos = 1 if side==0 else 6
@@ -359,11 +390,12 @@ class Pawn(Figure):
             moves.append((0, sideDir*2))
 
         if level == 1:
-            moves = filterForCheckNextMove(board, moves, position, side, piecesPos, pieceId, pieceIndex)
+            moves = filterForCheckNextMove(board, moves, position, side, piecesPos, pieceId, pieceIndex, boardInfo)
 
         return [
             (position[0]+y, position[1]+x) for x,y in moves
         ]
+
 
 class Knight(Figure):
     def __init__(self):
@@ -376,12 +408,12 @@ class Knight(Figure):
         while (0,0) in self.allMoves:
             self.allMoves.remove((0,0))
 
-    def getLegalMoves(self, board: numpy.ndarray, position: tuple, side: int, piecesPos: dict, pieceId: int, pieceIndex: int, level: int=1):
+    def getLegalMoves(self, board: np.ndarray, position: tuple, side: int, piecesPos: dict, pieceId: int, pieceIndex: int, boardInfo: dict, level: int=1):
 
         moves = self.getLegalMovesByBoard(board, position, side)
 
         if level == 1:
-            moves = filterForCheckNextMove(board, moves, position, side, piecesPos, pieceId, pieceIndex)
+            moves = filterForCheckNextMove(board, moves, position, side, piecesPos, pieceId, pieceIndex, boardInfo)
 
         return [
             (position[0]+y, position[1]+x) for x,y in moves
@@ -396,14 +428,14 @@ class Bishop(Figure):
         while (0,0) in self.allMoves:
             self.allMoves.remove((0,0))
 
-    def getLegalMoves(self, board: numpy.ndarray, position: tuple, side: int, piecesPos: dict, pieceId: int, pieceIndex: int, level: int=1):
+    def getLegalMoves(self, board: np.ndarray, position: tuple, side: int, piecesPos: dict, pieceId: int, pieceIndex: int, boardInfo: dict, level: int=1):
 
         moves = self.getLegalMovesByBoard(board, position, side)
 
         moves = filterDiagonally(board, moves, position, side, level)
 
         if level == 1:
-            moves = filterForCheckNextMove(board, moves, position, side, piecesPos, pieceId, pieceIndex)
+            moves = filterForCheckNextMove(board, moves, position, side, piecesPos, pieceId, pieceIndex, boardInfo)
 
         return [
             (position[0]+y, position[1]+x) for x,y in moves
@@ -419,20 +451,20 @@ class Rook(Figure):
         while (0,0) in self.allMoves:
             self.allMoves.remove((0,0))
 
-    def getLegalMoves(self, board: numpy.ndarray, position: tuple, side: int, piecesPos: dict, pieceId: int, pieceIndex: int, level: int=1):
+    def getLegalMoves(self, board: np.ndarray, position: tuple, side: int, piecesPos: dict, pieceId: int, pieceIndex: int, boardInfo: dict, level: int=1):
 
         moves = self.getLegalMovesByBoard(board, position, side)
 
         moves = filterStraight(board, moves, position, side, level)
 
         if level == 1:
-            moves = filterForCheckNextMove(board, moves, position, side, piecesPos, pieceId, pieceIndex)
+            moves = filterForCheckNextMove(board, moves, position, side, piecesPos, pieceId, pieceIndex, boardInfo)
 
         return [
             (position[0]+y, position[1]+x) for x,y in moves
         ]
 
-def filterDiagonally(board: numpy.ndarray, moves, position: tuple, side: int, level: int=0):
+def filterDiagonally(board: np.ndarray, moves, position: tuple, side: int, level: int=0):
     if level==2:
         board2 = ChessBoard2()
         board2.visualizeLegalMoves(board[position[0], position[1], side], position, level+1)
@@ -455,14 +487,43 @@ def filterDiagonally(board: numpy.ndarray, moves, position: tuple, side: int, le
 
     return moves
 
-def filterStraight(board: numpy.ndarray, moves, position: tuple, side: int, level: int=0):
+def filterStraight(board: np.ndarray, moves, position: tuple, side: int, level: int=0):
     if level==2:
         board2 = ChessBoard2()
         board2.visualizeLegalMoves(board[position[0], position[1], side], position, level+1)
 
     blockedX = False
     blockedY = False
-    for xOry in range(-7,8):
+    for xOry in range(-1,-8,-1):
+        # y-moves
+        if (0,xOry) in moves:
+            if blockedX == True:
+                moves.remove((0,xOry))
+                continue
+
+            if board[position[0]+xOry, position[1], side] != 0:
+                moves.remove(((0,xOry)))
+                blockedX = True
+
+            if board[position[0]+xOry, position[1], OTHERSIDE(side)] != 0:
+                blockedX = True
+
+        # x-moves
+        if (xOry,0) in moves:
+            if blockedY == True:
+                moves.remove((xOry, 0))
+                continue
+
+            if board[position[0], position[1]+xOry, side] != 0:
+                moves.remove(((xOry, 0)))
+                blockedY = True
+
+            if board[position[0], position[1]+xOry, OTHERSIDE(side)] != 0:
+                blockedY = True
+
+    blockedX = False
+    blockedY = False
+    for xOry in range(0,8):
         # y-moves
         if (0,xOry) in moves:
             if blockedX == True:
@@ -491,7 +552,7 @@ def filterStraight(board: numpy.ndarray, moves, position: tuple, side: int, leve
                 
     return moves
 
-def filterForCheckNextMove(board: numpy.ndarray, moves, position: tuple, side: int, piecesPos: dict, pieceId: int, pieceIndex: int):
+def filterForCheckNextMove(board: np.ndarray, moves, position: tuple, side: int, piecesPos: dict, pieceId: int, pieceIndex: int, boardInfo: dict, level: int=1):
     
     position_orig = position
     moves2 = []
@@ -499,14 +560,14 @@ def filterForCheckNextMove(board: numpy.ndarray, moves, position: tuple, side: i
     # print("moves")
     # print(moves)
     # print("-------------------")
+    allEnemyPieces = [
+        (pieceId2, enemypieceIndex)
+        for pieceId2, piecelist in piecesPos[OTHERSIDE(side)].items() 
+        for enemypieceIndex in range(len(piecelist))
+    ]
     for move in moves:
         position = (position_orig[0]+move[1], position_orig[1]+move[0])
 
-        allEnemyPieces = [
-            (pieceId2, enemypieceIndex)
-            for pieceId2, piecelist in piecesPos[OTHERSIDE(side)].items() 
-            for enemypieceIndex in range(len(piecelist))
-        ]
 
         piecesPosCopy = piecesPos.copy()
         # # testing
@@ -515,6 +576,7 @@ def filterForCheckNextMove(board: numpy.ndarray, moves, position: tuple, side: i
         # # print(side)
         # # print(pieceId)
         # # print(pieceIndex)
+        previousPosition = piecesPosCopy[side][pieceId][pieceIndex]
         piecesPosCopy[side][pieceId][pieceIndex] = position
 
         board2 = board.copy()
@@ -523,21 +585,31 @@ def filterForCheckNextMove(board: numpy.ndarray, moves, position: tuple, side: i
         board2[position[0], position[1], side] = pieceId
         board2[position[0], position[1], OTHERSIDE(side)] = 0
 
-        # print(allEnemyPieces)
+        cb = ChessBoard2()
+        print(cb.toString(board2))
 
-        for pieceId, enemypieceIndex in allEnemyPieces:
+        boardInfo2 = updateBoardInfo(board2, boardInfo.copy(), side, piecesPos, pieceId, pieceIndex, previousPosition)
+
+        # print(allEnemyPieces)
+        canTakeThisMove = True
+        for pieceId2, enemypieceIndex in allEnemyPieces:
             # print(pieceId)
             # print(enemypieceIndex)
-            if not any(pieceMovePos == piecesPosCopy[side][KING][0] for pieceMovePos in PIECES_ID_TO_CLASS[pieceId].getLegalMoves(board, tuple(piecesPosCopy[OTHERSIDE(side)][pieceId][enemypieceIndex]), OTHERSIDE(side), piecesPosCopy, pieceId, enemypieceIndex, level=2)):
-                moves2.append(move)
+            enemyPieceMoves = PIECES_ID_TO_CLASS[pieceId2].getLegalMoves(board2, tuple(piecesPosCopy[OTHERSIDE(side)][pieceId2][enemypieceIndex]), OTHERSIDE(side), piecesPosCopy, pieceId2, enemypieceIndex, boardInfo2, level=level+1)
+
+            if piecesPosCopy[side][KING][0] in enemyPieceMoves:
+                canTakeThisMove = False
+        
+        if canTakeThisMove:
+            moves2.append(move)
             # print("----")
-        # print("---------")
+        print("---------")
 
 
     return moves2
 
 
-def allIdInBoardRange(board: numpy.ndarray, yRange, xRange, sideOneOrBoth, wantedId=0):
+def allIdInBoardRange(board: np.ndarray, yRange, xRange, sideOneOrBoth, wantedId=0):
     """ sideOneOrBoth: int -> one side, anything else -> both sides 
         xRange, yRange: tuple: range, anything else (int) -> the one int
     """

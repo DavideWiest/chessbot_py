@@ -1,9 +1,10 @@
 from .relations import *
 from .pieces import *
+import numpy as np
 
 def visualizeLegalMoves(self, pieceId: int, startPos: tuple=(4,4)):
     
-    newBoard = numpy.zeros((8,8,2), dtype=numpy.byte)
+    newBoard = np.zeros((8,8,2), dtype=np.byte)
 
     newBoard[startPos[0], startPos[1],0] = pieceId
 
