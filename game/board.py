@@ -5,7 +5,7 @@ from .boardfuncs import updateBoardInfo
 
 from string import ascii_uppercase
 from colorama import Fore, Back, Style
-
+import json
 
 class ChessBoard():
     """"
@@ -13,7 +13,7 @@ class ChessBoard():
     side is the respective player side (white = 1, black = 0)
     """
 
-    def __init__(self):
+    def __init__(self, gamesDir):
         "initialize board"
 
         self.board = np.zeros((8,8,2), dtype=np.byte)
@@ -24,6 +24,8 @@ class ChessBoard():
             "secondRookMoved": False,
             "doPrintInfo": True
         }
+
+        self.gamesDir = gamesDir
 
         # 0 = black = on the bottom half
         # 1 = white = on the top half
@@ -244,4 +246,17 @@ class ChessBoard():
 
         print("\n\n".join(rows))
 
+    def saveGame(self, filename):
+        np.save(self.gamesDir + "/" + filename, self.board, allow_pickle=True)
+        
+        fileToSave = {"pp": self.piecesPos, "bi": self.boardInfo}
+        with open(self.gamesDir + "/" + filename + ".json", "w") as f:
+            json.dump(fileToSave, f)
 
+    def loadGame(self, filename):
+        self.board = np.load(self.gamesDir + "/" + filename, allow_pickle=True)
+            
+        with open(self.gamesDir + "/" + filename + ".json", "r") as f:
+            fileToLoad = json.load(f)
+            self.piecePos = fileToLoad["pp"]
+            self.boardInfo = fileToLoad["bi"]

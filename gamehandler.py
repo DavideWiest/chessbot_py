@@ -8,11 +8,11 @@ import terminalplayer
 
 class GameHandler():
 
-    def __init__(self, playerWhite: Player, playerBlack: Player):
+    def __init__(self, playerWhite: Player, playerBlack: Player, gamesDir):
         self.pW = playerWhite
         self.pB = playerBlack
 
-        self.board = ChessBoard()
+        self.board = ChessBoard(gamesDir)
         self.referee = Referee()
 
     def run(self):
@@ -49,6 +49,9 @@ class GameHandler():
         self.board.makeMove(piecePos, move, True)
 
         self.board.boardInfo["lastMovePos"] = (move.y, move.x)
+    
+
+GAMES_DIR = "games"
 
 if __name__ == "__main__":
     # run game
@@ -63,5 +66,11 @@ if __name__ == "__main__":
     playerWhite = available_players[int(input("Player white: "))](0, "green")
     playerBlack = available_players[int(input("Player black: "))](1, "yellow")
 
-    gh = GameHandler(playerWhite, playerBlack)
+    loadGame = input("Filename of game to load (optional): ")
+
+    gh = GameHandler(playerWhite, playerBlack, GAMES_DIR)
+
+    if loadGame != "":
+        gh.board.loadGame(loadGame)
+
     gh.run()
