@@ -2,4 +2,5 @@ remove referee print statements (when done)
 
 pawns should be able to jump 2 spaces after the first move too
 
-pawn piecesPos were changed (are tuples later on)
+allow possible checkmates if king can take the piece that checks 
+(no further iteration, just checking that with the current board)

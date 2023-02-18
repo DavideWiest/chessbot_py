@@ -21,23 +21,22 @@ class Referee():
     
                 # board.visualizeLegalMoves(pieceId, pieceIndex, side, 2, self.allLegalMoves[pieceId][pieceIndex])
                 # print(PIECES_ID_TO_NAME[pieceId])
-                # print(self.allLegalMoves[pieceId][pieceIndex])
                 # print("----")
 
         # piece moves sum by piece id
-        # print([sum(len(moves) for moves in piecesMovesById.values()) 
-        #     for piecesMovesById in self.allLegalMoves.values()])
+        print(self.allLegalMoves)
 
         # sum of all possible moves
-        # print(sum(
-        #     sum(len(moves) for moves in piecesMovesById.values()) 
-        #     for piecesMovesById in self.allLegalMoves.values()
-        # ))
+        print(sum(
+            sum(len(moves) for moves in piecesMovesById.values()) 
+            for piecesMovesById in self.allLegalMoves.values()
+        ))
 
         if sum(
             sum(len(moves) for moves in piecesMovesById.values()) 
             for piecesMovesById in self.allLegalMoves.values()
-        ):
+        ) < 1:
+            print("winner has been")
             self.winner = "black" if side == "white" else "white"
 
 
@@ -47,8 +46,9 @@ class Referee():
 
         return (move.y, move.x) in legalMovesOfPiece
 
-    def isMatchFinished(self):
-        return self.winner != None
+    def matchContinues(self):
+        "false if match is finished"
+        return self.winner == None
 
     def getWinner(self):
         return self.winner

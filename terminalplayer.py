@@ -29,11 +29,8 @@ class TerminalPlayer(Player):
 
         if len([True for movesYX in legalMovesPositions[move2.p].values() if (move2.y, move2.x) in movesYX]) > 1:
             optionStr = ""
-            print(board.piecesPos[self.side])
             
             for i in range(len(board.piecesPos[self.side][move2.p])):
-                # piecePos is wrong
-                print(board.piecesPos[self.side][move2.p][i])
                 p1YX = board.piecesPos[self.side][move2.p][i]
                 p1Pos = convertToStrMoveXY(p1YX)
                 optionStr += f"\n  {i} = {p1Pos}"
@@ -47,6 +44,10 @@ class TerminalPlayer(Player):
             for i, movesYX in enumerate(legalMovesPositions[move2.p].values()):
                 if (move2.y, move2.x) in movesYX:
                     piecesPosIndex = i
+
+            if piecesPosIndex == None:
+                print("Invalid move!\n ")
+                return self.getMove(board, legalMovesPositions)
 
         # print(piecesPosIndex)
 

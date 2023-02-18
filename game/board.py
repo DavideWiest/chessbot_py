@@ -21,7 +21,8 @@ class ChessBoard():
             "lastMovePos": (-1, -1),
             "kingMoved": False,
             "firstRookMoved": False,
-            "secondRookMoved": False
+            "secondRookMoved": False,
+            "doPrintInfo": True
         }
 
         # 0 = black = on the bottom half
@@ -104,6 +105,7 @@ class ChessBoard():
 
         currentPiecePos = self.piecesPos[move.side][move.p]
         piecePosIndex = currentPiecePos.index(list(piecePos))
+        previousPosition = currentPiecePos[piecePosIndex]
 
         self.board[
             currentPiecePos[piecePosIndex][0], currentPiecePos[piecePosIndex][1], move.side
@@ -113,15 +115,14 @@ class ChessBoard():
             currentPiecePos[piecePosIndex][0] += move.y
             currentPiecePos[piecePosIndex][1] += move.x
 
-            piecePos[move.side][move.p][piecePosIndex][0] += move.y
-            piecePos[move.side][move.p][piecePosIndex][1] += move.x
+            self.piecesPos[move.side][move.p][piecePosIndex][0] += move.y
+            self.piecesPos[move.side][move.p][piecePosIndex][1] += move.x
         else:
             currentPiecePos[piecePosIndex][0] = move.y
             currentPiecePos[piecePosIndex][1] = move.x
 
-            # move.p is wrong?
-            piecePos[move.side][move.p][piecePosIndex][0] = move.y
-            piecePos[move.side][move.p][piecePosIndex][1] = move.x
+            self.piecesPos[move.side][move.p][piecePosIndex][0] = move.y
+            self.piecesPos[move.side][move.p][piecePosIndex][1] = move.x
 
         toRemove = None
         for enemyPId, enemyPiecesPos in self.piecesPos[OTHERSIDE(move.side)].items():
@@ -138,6 +139,12 @@ class ChessBoard():
                 OTHERSIDE(move.side)
             ] = 0
 
+        self.board[
+                currentPiecePos[piecePosIndex][0],
+                currentPiecePos[piecePosIndex][1],
+                move.side
+            ] = move.p
+
         # castling
 
         if move.original.lower() == "o-o":
@@ -150,7 +157,7 @@ class ChessBoard():
         elif "=" in move.original:
             self.handlePromotion(move, piecePosIndex)
 
-        self.boardInfo = updateBoardInfo(self.board, self.boardInfo, move.side, move.p, piecePosIndex)
+        self.boardInfo = updateBoardInfo(self.board, self.boardInfo, self.piecesPos, move.side, move.p, piecePosIndex, previousPosition)
 
         return True
 

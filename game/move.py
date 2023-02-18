@@ -38,6 +38,9 @@ class Move():
         else:
             piece, posX, posY = "p" + move
 
+        if piece != "p" and "=" in move_orig:
+            raise ValueError
+
         if not posX.isnumeric():
             if posX not in ascii_lowercase[:8]:
                 raise ValueError

@@ -121,6 +121,7 @@ class Pawn(Figure):
                     moves.append((1,sideDir*1))
 
         if (1,sideDir*1) in moves:
+            # an indexerror occured here: position[0]+sideDir*1 was 8
             if board[position[0]+sideDir*1, position[1]+1, OTHERSIDE(side)] == 0:
                 moves.remove((1,sideDir*1))
             
@@ -307,9 +308,6 @@ def filterForCheckNextMove(board: np.ndarray, moves, position: tuple, side: int,
     position_orig = position
     moves2 = []
 
-    # print("moves")
-    # print(moves)
-    # print("-------------------")
     allEnemyPieces = [
         (pieceId2, enemypieceIndex)
         for pieceId2, piecelist in piecesPos[OTHERSIDE(side)].items() 
@@ -327,11 +325,11 @@ def filterForCheckNextMove(board: np.ndarray, moves, position: tuple, side: int,
                 pId: pMoves.copy() for pId, pMoves in piecesPos[1].items()
             }
         }
-        # print("--")
-        # print(piecesPosCopy[side][pieceId])
+
         # print(pieceId)
         # print(pieceIndex)
         # print("--")
+
         previousPosition = piecesPosCopy[side][pieceId][pieceIndex]
         piecesPosCopy[side][pieceId][pieceIndex] = position
 
@@ -341,23 +339,30 @@ def filterForCheckNextMove(board: np.ndarray, moves, position: tuple, side: int,
         board2[position[0], position[1], side] = pieceId
         board2[position[0], position[1], OTHERSIDE(side)] = 0
 
-        boardInfo2 = updateBoardInfo(board2, boardInfo.copy(), side, piecesPosCopy, pieceId, pieceIndex, previousPosition)
+        boardInfo2 = updateBoardInfo(board2, boardInfo.copy(), piecesPosCopy, side, pieceId, pieceIndex, previousPosition)
 
 
         canTakeThisMove = True
+        positionsToCheckLater = []
+        combinedEnemyMoves = []
         for pieceId2, enemypieceIndex in allEnemyPieces:
-            # print(pieceId)
-            # print(enemypieceIndex)
-            enemyPieceMoves = PIECES_ID_TO_CLASS[pieceId2].getLegalMoves(board2, tuple(piecesPosCopy[OTHERSIDE(side)][pieceId2][enemypieceIndex]), OTHERSIDE(side), piecesPosCopy, pieceId2, enemypieceIndex, boardInfo2, level=2)
-
+            enemyPosition = tuple(piecesPosCopy[OTHERSIDE(side)][pieceId2][enemypieceIndex])
+            enemyPieceMoves = PIECES_ID_TO_CLASS[pieceId2].getLegalMoves(board2, enemyPosition, OTHERSIDE(side), piecesPosCopy, pieceId2, enemypieceIndex, boardInfo2, level=2)
+            combinedEnemyMoves += enemyPieceMoves
+                
             if tuple(piecesPosCopy[side][KING][0]) in enemyPieceMoves:
-                canTakeThisMove = False
+                if tuple(piecesPosCopy[side][KING][0]) in vicinityOf(enemyPosition, 1):
+                    positionsToCheckLater.append(enemyPosition)
+                else:
+                    canTakeThisMove = False
+                    break
+        
+        # check if king could take the piece that checks it
+        if any(pos in combinedEnemyMoves for pos in positionsToCheckLater):
+            canTakeThisMove = False
         
         if canTakeThisMove:
             moves2.append(move)
-            # print("----")
-        # print("------")
-
 
     return moves2
 
@@ -385,6 +390,16 @@ def allIdInBoardRange(board: np.ndarray, yRange, xRange, sideOneOrBoth, wantedId
                     return False
 
     return True
+
+def vicinityOf(position: tuple, stepsY: int, stepsX: int=None):
+    "as tuples"
+    if stepsX == None:
+        stepsX = stepsY
+    return [
+        (position[0]+stepY, position[1]+stepX)
+        for stepY in range(-stepsY, stepsY+1)
+        for stepX in range(-stepsX, stepsX+1)
+    ]
 
 
 PIECES_ID_TO_CLASS = {

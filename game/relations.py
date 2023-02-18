@@ -41,4 +41,5 @@ PAWN_PROMOTION_OPTIONS = [
 ]
 
 COLOR_SIDE = lambda side: Fore.GREEN if side==BLACK else Fore.YELLOW
+COLORSTR_SIDE = lambda side: "green" if side == BLACK else "yellow"
 TEST_COLOR = Fore.MAGENTA

@@ -20,14 +20,14 @@ class GameHandler():
         self.index = 1
 
         # to implement 
-        while not self.referee.isMatchFinished():
+        while self.referee.matchContinues():
             self.handleSingleMove()
 
         winner = self.referee.getWinner()
         print(f"Game finished. {winner} won")
 
     def handleSingleMove(self):
-        currentPlayer, currentPlayerStr = (playerWhite, "white") if self.index % 2 == 1 else (playerBlack, "black")
+        currentPlayer, currentPlayerStr = (playerWhite, "white") if self.index % 2 == 0 else (playerBlack, "black")
         print(f"Move {self.index} - {currentPlayerStr.capitalize()}'s turn \n\n")
 
         self.referee.computeAllLegalMoves(self.board, currentPlayer.side)
