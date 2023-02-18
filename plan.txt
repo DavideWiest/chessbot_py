@@ -9,3 +9,5 @@ figure options wrong (by 2,3)
 queen has illegal moves ?
 
 pawns should be able to jump 2 spaces after the first move too
+
+visualizeLegalMoves: filterDiagonally and filterStraight dont filter

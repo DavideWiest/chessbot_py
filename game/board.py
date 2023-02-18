@@ -196,3 +196,38 @@ class ChessBoard():
         if pieceId == testPieceId:
             return TEST_COLOR + "T" + Fore.RESET
         return COLOR_SIDE(side) + PIECES_ID_TO_STR[pieceId].upper() + Fore.RESET
+
+    def visualizeLegalMoves(self, pieceId: int, pieceIndex: int, side: int, level: int=2, legalMoves: list = None):
+        
+        newBoard = self.board.copy()
+
+        pos = self.piecesPos[side][pieceId][pieceIndex]
+
+        if legalMoves == None:
+            legalMoves = PIECES_ID_TO_CLASS[pieceId].getLegalMoves(newBoard, pos, side, self.piecesPos, pieceId, pieceIndex, self.boardInfo, level)
+
+        for y, x in legalMoves:
+            newBoard[y,x,OTHERSIDE(side)] = 12
+ 
+        rows = []
+
+        for rowindex in range(8):
+            # rows.append(f"{8-rowindex}   " + "   ".join(
+            rows.append(f"{rowindex}   " + "   ".join(
+                str(
+                    self.preparePiece(newBoard[rowindex, colindex, 0], 0, 12)
+                    if newBoard[rowindex, colindex, 0] != 0 
+                    else self.preparePiece(newBoard[rowindex, colindex, 1], 1, 12)
+                )
+                for colindex in range(8)
+                ))
+        # rows.append(
+        #     "    " + "   ".join([f"{ascii_uppercase[i]}" for i in range(8)])
+        # )
+        rows.append(
+            "    " + "   ".join([f"{i}" for i in range(8)])
+        )
+
+        print("\n\n".join(rows))
+
+

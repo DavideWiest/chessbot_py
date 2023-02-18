@@ -278,7 +278,7 @@ class Figure():
         return moves
 
     def __repr__(self):
-        return PIECES_ID_TO_STR[PIECES_CLASS_TO_ID[self.__class__.__name__]]
+        return PIECES_ID_TO_STR[PIECES_NAME_TO_ID[self.__class__.__name__]]
 
 class King(Figure):
     def __init__(self):
@@ -655,7 +655,7 @@ PIECES_ID_TO_CLASS = {
     QUEEN: Queen()
 }
 
-PIECES_CLASS_TO_ID = {
+PIECES_NAME_TO_ID = {
     "King": KING,
     "Pawn": PAWN,
     "Knight": KNIGHT,

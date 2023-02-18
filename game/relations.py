@@ -14,7 +14,7 @@ ROOK = 5
 QUEEN = 9
 
 
-PIECES_CLASS_TO_ID = {
+PIECES_NAME_TO_ID = {
     "King": KING,
     "Pawn": PAWN,
     "Knight": KNIGHT,
@@ -33,6 +33,8 @@ PIECES_STR_TO_ID = {
 }
 
 PIECES_ID_TO_STR = {v: k for k, v in PIECES_STR_TO_ID.items()}
+
+PIECES_ID_TO_NAME = {v: k for k, v in PIECES_NAME_TO_ID.items()}
 
 PAWN_PROMOTION_OPTIONS = [
     "n", "b", "r", "q"

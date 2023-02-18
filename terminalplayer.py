@@ -12,12 +12,12 @@ class TerminalPlayer(Player):
         self.side = side
         self.color = color
         self.needsValidityChecked = True
-        self.needsAllLegalMoves = False
+        self.needsAllLegalMoves = True
 
     def printBoard(self, board: ChessBoard):
         print(str(board))
 
-    def getMove(self, board: ChessBoard):
+    def getMove(self, board: ChessBoard, legalMovesPositions: tuple):
 
         piecesPos = board.piecesPos
 

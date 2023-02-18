@@ -11,7 +11,9 @@ class Referee():
         pass
 
     def computeAllLegalMoves(self, board: ChessBoard, side: int):
-        self.allLegalMoves = {}
+        self.allLegalMoves = {
+            pId: {} for pId in list(PIECES_ID_TO_STR)
+        }
         for pieceId in board.piecesPos[side]:
             # testing
             # print("PID")
@@ -19,15 +21,27 @@ class Referee():
             for pieceIndex, piecePos in enumerate(board.piecesPos[side][pieceId]):
                 # print("PIN")
                 # print(pieceIndex)
+                print(piecePos)
                 
-                self.allLegalMoves[(pieceId, pieceIndex)] = PIECES_ID_TO_CLASS[pieceId].getLegalMoves(board.board, tuple(piecePos), side, board.piecesPos, pieceId, pieceIndex, board.boardInfo)
+                self.allLegalMoves[pieceId][pieceIndex] = PIECES_ID_TO_CLASS[pieceId].getLegalMoves(board.board, tuple(piecePos), side, board.piecesPos, pieceId, pieceIndex, board.boardInfo)
     
-                print(PIECES_ID_TO_STR[pieceId])
-                print(len(self.allLegalMoves[(pieceId, pieceIndex)]))
-                print(len(set(self.allLegalMoves[(pieceId, pieceIndex)])))
+                print(PIECES_ID_TO_NAME[pieceId])
+                board.visualizeLegalMoves(pieceId, pieceIndex, side, 2, self.allLegalMoves[pieceId][pieceIndex])
+                print(self.allLegalMoves[pieceId][pieceIndex])
                 print("----")
 
-        if sum(len(pieceMoves) for pieceMoves in self.allLegalMoves.values()):
+        print([sum(sum(moves) for moves in piecesMovesById.values()) 
+            for piecesMovesById in self.allLegalMoves.values()])
+
+        print(sum(
+            sum(sum(moves) for moves in piecesMovesById.values()) 
+            for piecesMovesById in self.allLegalMoves.values()
+        ))
+
+        if sum(
+            sum(sum(moves) for moves in piecesMovesById.values()) 
+            for piecesMovesById in self.allLegalMoves.values()
+        ):
             self.winner = "black" if side == "white" else "white"
 
 
