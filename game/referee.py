@@ -15,45 +15,37 @@ class Referee():
             pId: {} for pId in list(PIECES_ID_TO_STR)
         }
         for pieceId in board.piecesPos[side]:
-            # testing
-            # print("PID")
-            # print(pieceId)
             for pieceIndex, piecePos in enumerate(board.piecesPos[side][pieceId]):
-                # print("PIN")
-                # print(pieceIndex)
-                print(piecePos)
                 
                 self.allLegalMoves[pieceId][pieceIndex] = PIECES_ID_TO_CLASS[pieceId].getLegalMoves(board.board, tuple(piecePos), side, board.piecesPos, pieceId, pieceIndex, board.boardInfo)
     
-                print(PIECES_ID_TO_NAME[pieceId])
-                board.visualizeLegalMoves(pieceId, pieceIndex, side, 2, self.allLegalMoves[pieceId][pieceIndex])
-                print(self.allLegalMoves[pieceId][pieceIndex])
-                print("----")
+                # board.visualizeLegalMoves(pieceId, pieceIndex, side, 2, self.allLegalMoves[pieceId][pieceIndex])
+                # print(PIECES_ID_TO_NAME[pieceId])
+                # print(self.allLegalMoves[pieceId][pieceIndex])
+                # print("----")
 
-        print([sum(sum(moves) for moves in piecesMovesById.values()) 
-            for piecesMovesById in self.allLegalMoves.values()])
+        # piece moves sum by piece id
+        # print([sum(len(moves) for moves in piecesMovesById.values()) 
+        #     for piecesMovesById in self.allLegalMoves.values()])
 
-        print(sum(
-            sum(sum(moves) for moves in piecesMovesById.values()) 
-            for piecesMovesById in self.allLegalMoves.values()
-        ))
+        # sum of all possible moves
+        # print(sum(
+        #     sum(len(moves) for moves in piecesMovesById.values()) 
+        #     for piecesMovesById in self.allLegalMoves.values()
+        # ))
 
         if sum(
-            sum(sum(moves) for moves in piecesMovesById.values()) 
+            sum(len(moves) for moves in piecesMovesById.values()) 
             for piecesMovesById in self.allLegalMoves.values()
         ):
             self.winner = "black" if side == "white" else "white"
 
 
-    def isValidMove(self, position: tuple, move: Move, pieceIndex: int):
+    def isValidMove(self, move: Move, pieceIndex: int):
 
-        legalMovesOfPiece = self.allLegalMoves.get((move.p, pieceIndex), [])
+        legalMovesOfPiece = self.allLegalMoves.get(move.p, {}).get(pieceIndex, [])
 
-        print(self.allLegalMoves)
-        print(legalMovesOfPiece)
-
- 
-        return (position[0]+move.y, position[1]+move.x) in legalMovesOfPiece
+        return (move.y, move.x) in legalMovesOfPiece
 
     def isMatchFinished(self):
         return self.winner != None

@@ -14,48 +14,48 @@ class TerminalPlayer(Player):
         self.needsValidityChecked = True
         self.needsAllLegalMoves = True
 
-    def printBoard(self, board: ChessBoard):
-        print(str(board))
 
     def getMove(self, board: ChessBoard, legalMovesPositions: tuple):
 
-        piecesPos = board.piecesPos
+        print(str(board))
 
-        self.printBoard(board)
-
-        move = input(f"Your Move ({self.color}): ")
+        moveStr = input(f"Your Move ({self.color}): ")
         try:
-            move2 = Move(move, self.side, (0,0))
+            move2 = Move(moveStr, self.side, (0,0))
         except ValueError:
             print(traceback.format_exc())
             print("Invalid move. Try again \n")
             return self.getMove(board)
 
-        if len(piecesPos[move2.side][move2.p]) > 1:
+        if len([True for movesYX in legalMovesPositions[move2.p].values() if (move2.y, move2.x) in movesYX]) > 1:
             optionStr = ""
-            print(move2.p)
+            print(board.piecesPos[self.side])
             
-            for i in range(len(piecesPos[move2.side][move2.p])):
+            for i in range(len(board.piecesPos[self.side][move2.p])):
                 # piecePos is wrong
-                print(piecesPos[move2.side][move2.p][i])
-                p1X = piecesPos[move2.side][move2.p][i][0]
-                p1Y = piecesPos[move2.side][move2.p][i][1]
-                p1Pos = convertToStrMoveXY((p1Y, p1X+1))
-                optionStr += f"\n  {i}={p1Pos}"
+                print(board.piecesPos[self.side][move2.p][i])
+                p1YX = board.piecesPos[self.side][move2.p][i]
+                p1Pos = convertToStrMoveXY(p1YX)
+                optionStr += f"\n  {i} = {p1Pos}"
 
             try:
                 piecesPosIndex = int(input(f"Which piece? {optionStr} \n  ->"))
             except:
                 piecesPosIndex = int(input(f"\nTry again: Which piece? {optionStr} \n  ->"))
         else:
-            piecesPosIndex = 0
+            piecesPosIndex = None
+            for i, movesYX in enumerate(legalMovesPositions[move2.p].values()):
+                if (move2.y, move2.x) in movesYX:
+                    piecesPosIndex = i
 
-        piecePos = (
-                piecesPos[move2.side][move2.p][piecesPosIndex][0],
-                piecesPos[move2.side][move2.p][piecesPosIndex][1]
-        )
+        # print(piecesPosIndex)
 
-        move = Move(move, self.side, piecePos)
+        piecePos = tuple(board.piecesPos[self.side][move2.p][piecesPosIndex])
+
+        move = Move(moveStr, self.side, piecePos)
 
         # determines the move, and which piece is used for it
         return piecesPosIndex, piecePos, move
+
+
+

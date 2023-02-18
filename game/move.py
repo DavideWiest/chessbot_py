@@ -46,7 +46,7 @@ class Move():
             posX = int(posX)-1
 
         if posY.isnumeric():
-            posY = int(posY)-1
+            posY = 8-int(posY)
         else:
             raise ValueError
 
@@ -79,10 +79,10 @@ class MoveWithInts(Move):
         self.side = side
 
 
-def convertToStrMoveXY(moveXY: tuple, p: int = 0):
+def convertToStrMoveXY(moveYX: tuple, p: int = 0):
 
-    x = ascii_lowercase[moveXY[0]]
-    y = str(8-moveXY[1])
+    x = ascii_lowercase[moveYX[1]]
+    y = str(8-moveYX[0])
 
     if p != 0:
         p = PIECES_ID_TO_STR[p]

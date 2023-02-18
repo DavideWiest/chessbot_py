@@ -99,22 +99,29 @@ class ChessBoard():
         # to implement
 
     
-    def makeMove(self, piecePos: tuple, move: Move):
+    def makeMove(self, piecePos: tuple, move: Move, absolute=False):
         "move piece"
 
         currentPiecePos = self.piecesPos[move.side][move.p]
         piecePosIndex = currentPiecePos.index(list(piecePos))
-        previousPosition = currentPiecePos[piecePosIndex]
 
         self.board[
             currentPiecePos[piecePosIndex][0], currentPiecePos[piecePosIndex][1], move.side
         ] = 0
 
-        currentPiecePos[piecePosIndex][0] += move.y
-        currentPiecePos[piecePosIndex][1] += move.x
+        if not absolute:
+            currentPiecePos[piecePosIndex][0] += move.y
+            currentPiecePos[piecePosIndex][1] += move.x
 
-        piecePos[move.side][move.p][piecePosIndex][0] += move.y
-        piecePos[move.side][move.p][piecePosIndex][1] += move.x
+            piecePos[move.side][move.p][piecePosIndex][0] += move.y
+            piecePos[move.side][move.p][piecePosIndex][1] += move.x
+        else:
+            currentPiecePos[piecePosIndex][0] = move.y
+            currentPiecePos[piecePosIndex][1] = move.x
+
+            # move.p is wrong?
+            piecePos[move.side][move.p][piecePosIndex][0] = move.y
+            piecePos[move.side][move.p][piecePosIndex][1] = move.x
 
         toRemove = None
         for enemyPId, enemyPiecesPos in self.piecesPos[OTHERSIDE(move.side)].items():

@@ -319,7 +319,14 @@ def filterForCheckNextMove(board: np.ndarray, moves, position: tuple, side: int,
         position = (position_orig[0]+move[1], position_orig[1]+move[0])
 
 
-        piecesPosCopy = piecesPos.copy()
+        piecesPosCopy = {
+            0: {
+                pId: pMoves.copy() for pId, pMoves in piecesPos[0].items()
+            },
+            1: {
+                pId: pMoves.copy() for pId, pMoves in piecesPos[1].items()
+            }
+        }
         # print("--")
         # print(piecesPosCopy[side][pieceId])
         # print(pieceId)
@@ -334,7 +341,7 @@ def filterForCheckNextMove(board: np.ndarray, moves, position: tuple, side: int,
         board2[position[0], position[1], side] = pieceId
         board2[position[0], position[1], OTHERSIDE(side)] = 0
 
-        boardInfo2 = updateBoardInfo(board2, boardInfo.copy(), side, piecesPos, pieceId, pieceIndex, previousPosition)
+        boardInfo2 = updateBoardInfo(board2, boardInfo.copy(), side, piecesPosCopy, pieceId, pieceIndex, previousPosition)
 
 
         canTakeThisMove = True

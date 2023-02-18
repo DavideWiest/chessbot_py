@@ -38,7 +38,7 @@ class GameHandler():
             piecesPosIndex, piecePos, move = currentPlayer.getMove(self.board)
 
         if currentPlayer.needsValidityChecked:
-            if not self.referee.isValidMove(piecePos, move, piecesPosIndex): 
+            if not self.referee.isValidMove(move, piecesPosIndex): 
                 print("\n -> Invalid move! \n")
                 self.handleSingleMove()
             else:
@@ -46,7 +46,7 @@ class GameHandler():
         else:
             self.index += 1
 
-        self.board.makeMove(piecePos, move)
+        self.board.makeMove(piecePos, move, True)
 
         self.board.boardInfo["lastMovePos"] = (move.y, move.x)
 
