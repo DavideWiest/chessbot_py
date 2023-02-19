@@ -1,10 +1,3 @@
-remove referee print statements (when done)
 
-pawns should be able to jump 2 spaces after the first move too
-
-allow possible checkmates if king can take the piece that checks 
-(no further iteration, just checking that with the current board)
-
-queen/rook sometimes cant move (filterStraight)
-
-queen/bishop sometimes cant move (filterDiagonally)
+checkforchecknextmove not working (switching up sides?)
+for filterDiagonally

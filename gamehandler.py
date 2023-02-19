@@ -4,13 +4,18 @@ from game.player import *
 from game.move import *
 from game.referee import *
 
+from datetime import datetime
+
 import terminalplayer
 
 class GameHandler():
 
-    def __init__(self, playerWhite: Player, playerBlack: Player, gamesDir):
+    def __init__(self, playerWhite: Player, playerBlack: Player, gamesDir, autoSaveGame: bool):
         self.pW = playerWhite
         self.pB = playerBlack
+
+        self.autoSaveGame = autoSaveGame
+        self.autoSaveDT = datetime.now().strftime("%d-%m-%Y,%H:%M")
 
         self.board = ChessBoard(gamesDir)
         self.referee = Referee()
@@ -49,6 +54,9 @@ class GameHandler():
         self.board.makeMove(piecePos, move, True)
 
         self.board.boardInfo["lastMovePos"] = (move.y, move.x)
+
+        if self.autoSaveGame:
+            self.board.saveGame(self.autoSaveDT)
     
 
 GAMES_DIR = "games"
@@ -67,8 +75,10 @@ if __name__ == "__main__":
     playerBlack = available_players[int(input("Player black: "))](1, "yellow")
 
     loadGame = input("Filename of game to load (optional): ")
+    autoSaveGame = input("Autosave (y/n) (optional, default n): ")
+    autoSaveGame = True if autoSaveGame == "y" else False
 
-    gh = GameHandler(playerWhite, playerBlack, GAMES_DIR)
+    gh = GameHandler(playerWhite, playerBlack, GAMES_DIR, autoSaveGame)
 
     if loadGame != "":
         gh.board.loadGame(loadGame)

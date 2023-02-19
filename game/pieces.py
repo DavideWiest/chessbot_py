@@ -218,89 +218,73 @@ def filterDiagonally(board: np.ndarray, moves, position: tuple, side: int):
     for d1 in [-1,1]:
             for d2 in [-1,1]:
                 blocked = False
-                for x in range(0,8):
+                for x in range(1,8):
                     if blocked == True:
                         if (x*d1,x*d2) in moves:
                             moves.remove((x*d1,x*d2))
                         continue
 
-                    if board[position[0]+x*d2, position[1]+x*d1, side] != 0:
+                    # avoid indexerror
+                    # if (x,x) in any diagonal direction have already been blocked, it was because of the board
+                    # if we would check again with the board, itd yield an indexerror
+                    # switched because moves is x,y but board is accessed with y,x
+                    if (x*d2, x*d1) not in moves:
+                        blocked = True
+                        continue
+
+                    if board[position[0]+x*d1, position[1]+x*d2, side] != 0:
                         if (x*d1,x*d2) in moves:
                             moves.remove((x*d1,x*d2))
                         blocked = True
 
-                    if board[position[0]+x*d2, position[1]+x*d1, OTHERSIDE(side)] != 0:
+                    if board[position[0]+x*d1, position[1]+x*d2, OTHERSIDE(side)] != 0:
                         blocked = True
 
     return moves
 
 def filterStraight(board: np.ndarray, moves, position: tuple, side: int):
-    blockedX = False
-    blockedY = False
-    for xOry in range(-1,-8,-1):
-        # y-moves
-        
-        if blockedX == True:
-            if (0,xOry) in moves:
-                moves.remove((0,xOry))
-            continue
 
-        if board[position[0]+xOry, position[1], side] != 0:
-            if (0,xOry) in moves:
-                moves.remove((0,xOry))
-            blockedX = True
+    for dir in [-1,1]:
+        blockedY = False
+        blockedX = False
 
-        if board[position[0]+xOry, position[1], OTHERSIDE(side)] != 0:
-            blockedX = True
+        for xOry in range(1,8):
+            # y-moves
+            
+            if blockedY == True:
+                if (0,dir*xOry) in moves:
+                    moves.remove((0,dir*xOry))
+            # avoid indexerror
+            elif position[0]+dir*xOry > 7 or position[0]+dir*xOry < 0:
+                blockedY = True
+            else:
 
-        # x-moves
-        
-        if blockedY == True:
-            if (xOry, 0) in moves:
-                moves.remove((xOry, 0))
-            continue
+                if board[position[0]+dir*xOry, position[1], side] != 0:
+                    if (0,dir*xOry) in moves:
+                        moves.remove((0,xOry))
+                    blockedY = True
 
-        if board[position[0], position[1]+xOry, side] != 0:
-            if (xOry, 0) in moves:
-                moves.remove((xOry, 0))
-            blockedY = True
+                if board[position[0]+dir*xOry, position[1], OTHERSIDE(side)] != 0:
+                    blockedY = True
 
-        if board[position[0], position[1]+xOry, OTHERSIDE(side)] != 0:
-            blockedY = True
+            # x-moves
+            
+            if blockedX == True:
+                if (dir*xOry, 0) in moves:
+                    moves.remove((dir*xOry, 0))
+            # avoid indexerror
+            elif position[1]+dir*xOry > 7 or position[1]+dir*xOry < 0:
+                blockedX = True
+            else:
 
-    blockedX = False
-    blockedY = False
-    for xOry in range(0,8):
-        # y-moves
-        
-        if blockedX == True:
-            if (0,xOry) in moves:
-                moves.remove((0,xOry))
-            continue
+                if board[position[0], position[1]+dir*xOry, side] != 0:
+                    if (dir*xOry, 0) in moves:
+                        moves.remove((dir*xOry, 0))
+                    blockedX = True
 
-        if board[position[0]+xOry, position[1], side] != 0:
-            if (0,xOry) in moves:
-                moves.remove((0,xOry))
-            blockedX = True
-
-        if board[position[0]+xOry, position[1], OTHERSIDE(side)] != 0:
-            blockedX = True
-
-        # x-moves
-        
-        if blockedY == True:
-            if (xOry, 0) in moves:
-                moves.remove((xOry, 0))
-            continue
-
-        if board[position[0], position[1]+xOry, side] != 0:
-            if (xOry, 0) in moves:
-                moves.remove((xOry, 0))
-            blockedY = True
-
-        if board[position[0], position[1]+xOry, OTHERSIDE(side)] != 0:
-            blockedY = True
-                
+                if board[position[0], position[1]+dir*xOry, OTHERSIDE(side)] != 0:
+                    blockedX = True
+                        
     return moves
 
 def filterForCheckNextMove(board: np.ndarray, moves, position: tuple, side: int, piecesPos: dict, pieceId: int, pieceIndex: int, boardInfo: dict):
