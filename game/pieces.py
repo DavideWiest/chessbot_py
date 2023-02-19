@@ -385,7 +385,6 @@ def vicinityOf(position: tuple, stepsY: int, stepsX: int=None):
         for stepX in range(-stepsX, stepsX+1)
     ]
 
-
 PIECES_ID_TO_CLASS = {
     KING: King(),
     PAWN: Pawn(),
