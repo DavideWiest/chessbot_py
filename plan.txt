@@ -1,3 +1,5 @@
 
 checkforchecknextmove not working (switching up sides?)
 for filterDiagonally
+
+king not in check 

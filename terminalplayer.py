@@ -4,6 +4,7 @@ from game.player import *
 from game.move import *
 from game.referee import *
 
+from datetime import datetime
 import traceback
 
 class TerminalPlayer(Player):
@@ -22,7 +23,10 @@ class TerminalPlayer(Player):
         moveStr = input(f"Your Move ({self.color}): ")
 
         if moveStr.startswith("sg="):
-            board.saveGame(moveStr.split("=")[1])
+            filename = moveStr.split("=")[1]
+            if filename == "dt":
+                filename = datetime.now().strftime("%d-%m-%Y-%H-%M")
+            board.saveGame(filename)
             print("Game was saved")
             return self.getMove(board, legalMovesPositions)
 

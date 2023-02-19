@@ -118,10 +118,10 @@ class Pawn(Figure):
 
                 # en passant
                 if board[position[0], position[1]-1, OTHERSIDE(side)] == PAWN and boardInfo["lastMovePos"][1] == position[1]-1 and boardInfo["lastMovePos"][0] == position[0]:
-                    moves.append((1,sideDir*1))
+                    moves.append((-1,sideDir*1))
 
         if (1,sideDir*1) in moves:
-            # an indexerror occured here: position[0]+sideDir*1 was 8
+            # an indexerror occured here: position[1]+1 was 8
             if board[position[0]+sideDir*1, position[1]+1, OTHERSIDE(side)] == 0:
                 moves.remove((1,sideDir*1))
             
@@ -129,16 +129,17 @@ class Pawn(Figure):
                 if board[position[0], position[1]+1, OTHERSIDE(side)] == PAWN and boardInfo["lastMovePos"][1] == position[1]+1 and boardInfo["lastMovePos"][0] == position[0]:
                     moves.append((1,sideDir*1))
 
-        if np.any(board[position[0]+sideDir*1, position[1], OTHERSIDE(side)] != 0):
-            moves.remove((0,sideDir*1))
+        if (0,sideDir*1) in moves:
+            if np.any(board[position[0]+sideDir*1, position[1], :] != 0):
+                moves.remove((0,sideDir*1))
 
         # if pawn hasnt moved yet: can move 2 pieces
         startPos = 1 if side==0 else 6
         # if pawn hasnt moved yet, space is not occupied, and piece can move 1 further already
-        if position[0] == startPos and \
-            np.all(board[position[0]+sideDir*2, position[1], :] == 0) and \
+        if position[0] == startPos:
+            if np.all(board[position[0]+sideDir*2, position[1], :] == 0) and \
             (0,sideDir*1) in moves:
-            moves.append((0, sideDir*2))
+                moves.append((0, sideDir*2))
 
         if level == 1:
             moves = filterForCheckNextMove(board, moves, position, side, piecesPos, pieceId, pieceIndex, boardInfo)

@@ -71,12 +71,13 @@ if __name__ == "__main__":
     print("available players:")
     print("\n".join(f"{k}: {v}" for k,v in available_players.items()))
 
-    playerBlack = available_players[int(input("Player black: "))](0, "yellow")
-    playerWhite = available_players[int(input("Player white: "))](1, "green")
+    playerBlack = available_players[int(input(f"Player {COLORSTR_SIDE(0)}: "))](0, COLORSTR_SIDE(0))
+    playerWhite = available_players[int(input(f"Player {COLORSTR_SIDE(1)}: "))](1, COLORSTR_SIDE(1))
 
     loadGame = input("Filename of game to load (optional): ")
     autoSaveGame = input("Autosave (y / n / s = every 5th move) (optional, default n): ")
-    assert autoSaveGame in ("y", "n", "s")
+    if autoSaveGame not in ("y", "n", "s"):
+        autoSaveGame = "n"
 
     gh = GameHandler(playerWhite, playerBlack, GAMES_DIR, autoSaveGame)
 
