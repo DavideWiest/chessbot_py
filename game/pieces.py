@@ -88,10 +88,24 @@ class Queen(Figure):
         # sort out moves that are blocked
 
         moves = filterStraight(board, moves, position, side)
-        moves = filterDiagonally(board, moves, position, side)
+        if level == 1:
+            print("queen moves:")
+            print([(position[0]+y, position[1]+x) for x,y in moves])
+            print("---------")
+        moves = filterDiagonally(board, moves, position, side, level)
+        if level == 1:
+            print("queen moves 2:")
+            print([(position[0]+y, position[1]+x) for x,y in moves])
+            print("---------")
 
         if level == 1:
             moves = filterForCheckNextMove(board, moves, position, side, piecesPos, pieceId, pieceIndex, boardInfo)
+
+        # if level == 1:
+        #     print("queen moves 3:")
+        #     print([(position[0]+y, position[1]+x) for x,y in moves])
+        #     print("---------")
+
 
         return [
             (position[0]+y, position[1]+x) for x,y in moves
@@ -183,7 +197,7 @@ class Bishop(Figure):
 
         moves = self.getLegalMovesByBoard(board, position, side)
 
-        moves = filterDiagonally(board, moves, position, side)
+        moves = filterDiagonally(board, moves, position, side, level)
 
         if level == 1:
             moves = filterForCheckNextMove(board, moves, position, side, piecesPos, pieceId, pieceIndex, boardInfo)
@@ -215,30 +229,49 @@ class Rook(Figure):
             (position[0]+y, position[1]+x) for x,y in moves
         ]
 
-def filterDiagonally(board: np.ndarray, moves, position: tuple, side: int):
-    for d1 in [-1,1]:
-            for d2 in [-1,1]:
+def filterDiagonally(board: np.ndarray, moves, position: tuple, side: int, level: int):
+    for dX in [-1,1]:
+            for dY in [-1,1]:
                 blocked = False
                 for x in range(1,8):
                     if blocked == True:
-                        if (x*d1,x*d2) in moves:
-                            moves.remove((x*d1,x*d2))
+                        if (x*dX,x*dY) in moves:
+                            if level == 1:
+                                print("removed 1")
+                                print((position[0]+x*dY, position[1]+x*dX))
+                                print((x*dX, x*dY))
+                            moves.remove((x*dX,x*dY))
                         continue
 
                     # avoid indexerror
                     # if (x,x) in any diagonal direction have already been blocked, it was because of the board
                     # if we would check again with the board, itd yield an indexerror
                     # switched because moves is x,y but board is accessed with y,x
-                    if (x*d2, x*d1) not in moves:
+                    if (x*dX, x*dY) not in moves:
+                        if level == 1:
+                            print("blocked 1")
+                            print((position[0]+x*dY, position[1]+x*dX))
+                            print((x*dX, x*dY))
                         blocked = True
                         continue
 
-                    if board[position[0]+x*d1, position[1]+x*d2, side] != 0:
-                        if (x*d1,x*d2) in moves:
-                            moves.remove((x*d1,x*d2))
+                    if board[position[0]+x*dY, position[1]+x*dX, side] != 0:
+                        if (x*dX,x*dY) in moves:
+                            if level == 1:
+                                print("removed 2")
+                                print((position[0]+x*dY, position[1]+x*dX))
+                                print((x*dX, *dY))
+                            moves.remove((x*dX,x*dY))
+                        if level == 1:
+                            print("blocked 2")
+                            print((position[0]+x*dY, position[1]+x*dX))
+                            print((x*dX, x*dY))
                         blocked = True
 
-                    if board[position[0]+x*d1, position[1]+x*d2, OTHERSIDE(side)] != 0:
+                    if board[position[0]+x*dY, position[1]+x*dX, OTHERSIDE(side)] != 0:
+                        print("blocked 3")
+                        print((position[0]+x*dY, position[1]+x*dX))
+                        print((x*dX, x*dY))
                         blocked = True
 
     return moves
@@ -336,6 +369,10 @@ def filterForCheckNextMove(board: np.ndarray, moves, position: tuple, side: int,
             combinedEnemyMoves += enemyPieceMoves
                 
             if tuple(piecesPosCopy[side][KING][0]) in enemyPieceMoves:
+                print("checking vicinity of")
+                print(PIECES_ID_TO_NAME[pieceId2])
+                print(tuple(piecesPosCopy[side][KING][0]))
+                print(tuple(piecesPosCopy[side][KING][0]) in vicinityOf(enemyPosition, 1))
                 if tuple(piecesPosCopy[side][KING][0]) in vicinityOf(enemyPosition, 1):
                     positionsToCheckLater.append(enemyPosition)
                 else:
@@ -343,6 +380,9 @@ def filterForCheckNextMove(board: np.ndarray, moves, position: tuple, side: int,
                     break
         
         # check if king could take the piece that checks it
+        print("check if king could take the piece")
+        print([pos in combinedEnemyMoves for pos in positionsToCheckLater])
+        print(any(pos in combinedEnemyMoves for pos in positionsToCheckLater))
         if any(pos in combinedEnemyMoves for pos in positionsToCheckLater):
             canTakeThisMove = False
         
@@ -378,6 +418,7 @@ def allIdInBoardRange(board: np.ndarray, yRange, xRange, sideOneOrBoth, wantedId
 
 def vicinityOf(position: tuple, stepsY: int, stepsX: int=None):
     "as tuples"
+    
     if stepsX == None:
         stepsX = stepsY
     return [

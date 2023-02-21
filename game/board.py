@@ -254,7 +254,7 @@ class ChessBoard():
             json.dump(fileToSave, f)
 
     def loadGame(self, filename):
-        self.board = np.load(self.gamesDir + "/" + filename, allow_pickle=True)
+        self.board = np.load(self.gamesDir + "/" + filename + ".npy", allow_pickle=True)
             
         with open(self.gamesDir + "/" + filename + ".json", "r") as f:
             fileToLoad = json.load(f)

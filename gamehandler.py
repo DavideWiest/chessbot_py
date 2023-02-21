@@ -5,7 +5,7 @@ from game.move import *
 from game.referee import *
 
 from datetime import datetime
-
+import sys
 import terminalplayer
 
 class GameHandler():
@@ -64,15 +64,27 @@ GAMES_DIR = "games"
 if __name__ == "__main__":
     # run game
 
-    available_players = {
-        1: terminalplayer.TerminalPlayer
-    }
+    available_players = [
+        terminalplayer.TerminalPlayer
+    ]
 
-    print("available players:")
-    print("\n".join(f"{k}: {v}" for k,v in available_players.items()))
+    if len(sys.argv) > 2:
+        condition = sys.argv[-2].isnumeric() and sys.argv[-1].isnumeric()
+    else:
+        condition = False
 
-    playerBlack = available_players[int(input(f"Player {COLORSTR_SIDE(0)}: "))](0, COLORSTR_SIDE(0))
-    playerWhite = available_players[int(input(f"Player {COLORSTR_SIDE(1)}: "))](1, COLORSTR_SIDE(1))
+    if condition:
+        player0Id = int(sys.argv[-2])
+        player1Id = int(sys.argv[-1])
+    else:
+        print("available players:")
+        print("\n".join(f"{i}: {v}" for i,v in enumerate(available_players)))
+
+        player0Id = int(input(f"Player {COLORSTR_SIDE(0)}: "))
+        player1Id = int(input(f"Player {COLORSTR_SIDE(1)}: "))
+
+    playerBlack = available_players[player0Id](0, COLORSTR_SIDE(0))
+    playerWhite = available_players[player1Id](1, COLORSTR_SIDE(1))
 
     loadGame = input("Filename of game to load (optional): ")
     autoSaveGame = input("Autosave (y / n / s = every 5th move) (optional, default n): ")
@@ -85,3 +97,4 @@ if __name__ == "__main__":
         gh.board.loadGame(loadGame)
 
     gh.run()
+
