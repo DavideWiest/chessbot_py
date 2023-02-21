@@ -86,9 +86,18 @@ class Queen(Figure):
         moves = self.getLegalMovesByBoard(board, position, side)
 
         # sort out moves that are blocked
-
+        
+        if level==1:
+            print("QUEEN MOVES")
+            print(moves)
         moves = filterStraight(board, moves, position, side)
+        if level==1:
+            print("QUEEN MOVES")
+            print(moves)
         moves = filterDiagonally(board, moves, position, side)
+        if level==1:
+            print("QUEEN MOVES")
+            print(moves)
 
         if level == 1:
             moves = filterForCheckNextMove(board, moves, position, side, piecesPos, pieceId, pieceIndex, boardInfo)
@@ -323,6 +332,9 @@ def filterForCheckNextMove(board: np.ndarray, moves, position: tuple, side: int,
         boardInfo2[0], boardInfo2[1] = boardInfo[0].copy(), boardInfo[1].copy()
         boardInfo2[side] = updateBoardInfo(board2, boardInfo2[side], piecesPosCopy, side, pieceId, pieceIndex, previousPosition)
 
+        if pieceId == QUEEN:
+            print("QUEEN")
+            print(move)
 
         canTakeThisMove = True
         positionsToCheckLater = []
