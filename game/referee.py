@@ -16,7 +16,6 @@ class Referee():
         }
         for pieceId in board.piecesPos[side]:
             for pieceIndex, piecePos in enumerate(board.piecesPos[side][pieceId]):
-                
                 self.allLegalMoves[pieceId][pieceIndex] = PIECES_ID_TO_CLASS[pieceId].getLegalMoves(board.board, tuple(piecePos), side, board.piecesPos, pieceId, pieceIndex, board.boardInfo)
     
                 # board.visualizeLegalMoves(pieceId, pieceIndex, side, 2, self.allLegalMoves[pieceId][pieceIndex])

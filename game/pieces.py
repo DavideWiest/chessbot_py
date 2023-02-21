@@ -88,24 +88,10 @@ class Queen(Figure):
         # sort out moves that are blocked
 
         moves = filterStraight(board, moves, position, side)
-        if level == 1:
-            print("queen moves:")
-            print([(position[0]+y, position[1]+x) for x,y in moves])
-            print("---------")
         moves = filterDiagonally(board, moves, position, side)
-        if level == 1:
-            print("queen moves 2:")
-            print([(position[0]+y, position[1]+x) for x,y in moves])
-            print("---------")
 
         if level == 1:
             moves = filterForCheckNextMove(board, moves, position, side, piecesPos, pieceId, pieceIndex, boardInfo)
-
-        # if level == 1:
-        #     print("queen moves 3:")
-        #     print([(position[0]+y, position[1]+x) for x,y in moves])
-        #     print("---------")
-
 
         return [
             (position[0]+y, position[1]+x) for x,y in moves
@@ -125,7 +111,6 @@ class Pawn(Figure):
         moves = self.getLegalMovesByBoard(board, position, side, sideDir)
 
         # pawns can only move downwards if side == white else only upwards
-
         if (-1,sideDir*1) in moves:
             if board[position[0]+sideDir*1, position[1]-1, OTHERSIDE(side)] == 0:
                 moves.remove((-1,sideDir*1))
@@ -324,10 +309,6 @@ def filterForCheckNextMove(board: np.ndarray, moves, position: tuple, side: int,
                 pId: pMoves.copy() for pId, pMoves in piecesPos[1].items()
             }
         }
-
-        # print(pieceId)
-        # print(pieceIndex)
-        # print("--")
 
         previousPosition = piecesPosCopy[side][pieceId][pieceIndex]
         piecesPosCopy[side][pieceId][pieceIndex] = position

@@ -119,7 +119,7 @@ class ChessBoard2():
                     break
 
         if toRemove != None:
-            self.piecesPos[OTHERSIDE(move.side)][toRemove[0]].pop(toRemove[1])
+            del self.piecesPos[OTHERSIDE(move.side)][toRemove[0]][toRemove[1]]
             self.board[
                 currentPiecePos[piecePosIndex][0],
                 currentPiecePos[piecePosIndex][1],
@@ -164,7 +164,7 @@ class ChessBoard2():
     def handlePromotion(self, move: Move, piecePosIndex):
         pieceId = PIECES_STR_TO_ID[move.original.split("=")[1].lower()]
         piecePos = self.piecesPos[move.side][PAWN][piecePosIndex]
-        self.piecesPos[move.side][PAWN].pop(piecePosIndex)
+        del self.piecesPos[move.side][PAWN][piecePosIndex]
         self.piecesPos[move.side][pieceId].append(piecePos)
         self.board[piecePos[0], piecePos[1], move.side] = pieceId
 

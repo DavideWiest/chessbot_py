@@ -1,5 +1,6 @@
 
-checkforchecknextmove not working (switching up sides?)
-for filterDiagonally
+pieces (pawn) not removed correctly (by loading?)
+-> resimulate with new save
+-> check if pawn positions make sense (did not in 1st save)
 
-king not in check 
+if queen takes pawn in game "o": king must take (make function filter check now)
