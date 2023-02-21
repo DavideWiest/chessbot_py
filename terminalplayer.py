@@ -29,14 +29,14 @@ class TerminalPlayer(Player):
                 filename = datetime.now().strftime("%d-%m-%Y-%H-%M")
             board.saveGame(filename, gh.index)
             print("Game was saved")
-            return self.getMove(board, legalMovesPositions)
+            return self.getMove(gh, legalMovesPositions)
 
         try:
             move2 = Move(moveStr, self.side, (0,0))
         except ValueError:
             print(traceback.format_exc())
             print("Invalid move. Try again \n")
-            return self.getMove(board, legalMovesPositions)
+            return self.getMove(gh, legalMovesPositions)
 
         if len([True for movesYX in legalMovesPositions[move2.p].values() if (move2.y, move2.x) in movesYX]) > 1:
             optionStr = ""
@@ -58,7 +58,7 @@ class TerminalPlayer(Player):
 
             if piecesPosIndex == None:
                 print("Invalid move!\n ")
-                return self.getMove(board, legalMovesPositions)
+                return self.getMove(gh, legalMovesPositions)
 
         # print(piecesPosIndex)
 

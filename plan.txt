@@ -4,3 +4,4 @@ pieces (pawn) not removed correctly (by loading?)
 -> check if pawn positions make sense (did not in 1st save)
 
 if queen takes pawn in game "o": king must take (make function filter check now)
+-> qc2 invalid move
