@@ -16,7 +16,8 @@ class TerminalPlayer(Player):
         self.needsAllLegalMoves = True
 
 
-    def getMove(self, board: ChessBoard, legalMovesPositions: tuple):
+    def getMove(self, gh, legalMovesPositions: tuple):
+        board = gh.board
 
         print(str(board))
 
@@ -26,7 +27,7 @@ class TerminalPlayer(Player):
             filename = moveStr.split("=")[1]
             if filename == "dt":
                 filename = datetime.now().strftime("%d-%m-%Y-%H-%M")
-            board.saveGame(filename)
+            board.saveGame(filename, gh.index)
             print("Game was saved")
             return self.getMove(board, legalMovesPositions)
 

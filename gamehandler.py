@@ -20,9 +20,9 @@ class GameHandler():
         self.board = ChessBoard(gamesDir)
         self.referee = Referee()
 
-    def run(self):
+    def run(self, moveIndex: int=0):
         
-        self.index = 0
+        self.index = moveIndex
 
         # to implement 
         while self.referee.matchContinues():
@@ -38,9 +38,9 @@ class GameHandler():
         self.referee.computeAllLegalMoves(self.board, currentPlayer.side)
 
         if currentPlayer.needsAllLegalMoves:
-            piecesPosIndex, piecePos, move = currentPlayer.getMove(self.board, self.referee.allLegalMoves)
+            piecesPosIndex, piecePos, move = currentPlayer.getMove(self, self.referee.allLegalMoves)
         else:
-            piecesPosIndex, piecePos, move = currentPlayer.getMove(self.board)
+            piecesPosIndex, piecePos, move = currentPlayer.getMove(self)
 
         if currentPlayer.needsValidityChecked:
             if not self.referee.isValidMove(move, piecesPosIndex): 
@@ -53,7 +53,7 @@ class GameHandler():
 
         self.board.makeMove(piecePos, move, True)
 
-        self.board.boardInfo["lastMovePos"] = (move.y, move.x)
+        self.board.boardInfo[currentPlayer.side]["lastMovePos"] = (move.y, move.x)
 
         if self.autoSaveGame == "y" or self.autoSaveGame == "s" and self.index % 5 == 1:
             self.board.saveGame(self.autoSaveDT)
@@ -94,7 +94,9 @@ if __name__ == "__main__":
     gh = GameHandler(playerWhite, playerBlack, GAMES_DIR, autoSaveGame)
 
     if loadGame != "":
-        gh.board.loadGame(loadGame)
+        moveIndex = gh.board.loadGame(loadGame)
+    else:
+        moveIndex = 0
 
-    gh.run()
+    gh.run(moveIndex)
 

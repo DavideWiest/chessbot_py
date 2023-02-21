@@ -47,15 +47,15 @@ class King(Figure):
 
         # if king and rook in startposition, and none of the spaces in between are occupied
         if position == startPos and \
-            boardInfo["kingMoved"] == False and \
-            boardInfo["firstRookMoved"] == False and \
+            boardInfo[side]["kingMoved"] == False and \
+            boardInfo[side]["firstRookMoved"] == False and \
             board[startPos[0], 0, side] == ROOK and \
             allIdInBoardRange(board, startPos[0], (1,3), (0,1), 0):
             moves.append((startPos[0], 1))
         
         if position == startPos and \
-            boardInfo["kingMoved"] == False and \
-            boardInfo["secondRookMoved"] == False and \
+            boardInfo[side]["kingMoved"] == False and \
+            boardInfo[side]["secondRookMoved"] == False and \
             board[startPos[0], 7, side] == ROOK and \
             allIdInBoardRange(board, startPos[0], (4,7), (0,1), 0):
             moves.append((startPos[0], 6))
@@ -92,7 +92,7 @@ class Queen(Figure):
             print("queen moves:")
             print([(position[0]+y, position[1]+x) for x,y in moves])
             print("---------")
-        moves = filterDiagonally(board, moves, position, side, level)
+        moves = filterDiagonally(board, moves, position, side)
         if level == 1:
             print("queen moves 2:")
             print([(position[0]+y, position[1]+x) for x,y in moves])
@@ -131,7 +131,7 @@ class Pawn(Figure):
                 moves.remove((-1,sideDir*1))
 
                 # en passant
-                if board[position[0], position[1]-1, OTHERSIDE(side)] == PAWN and boardInfo["lastMovePos"][1] == position[1]-1 and boardInfo["lastMovePos"][0] == position[0]:
+                if board[position[0], position[1]-1, OTHERSIDE(side)] == PAWN and boardInfo[side]["lastMovePos"][1] == position[1]-1 and boardInfo[side]["lastMovePos"][0] == position[0]:
                     moves.append((-1,sideDir*1))
 
         if (1,sideDir*1) in moves:
@@ -140,7 +140,7 @@ class Pawn(Figure):
                 moves.remove((1,sideDir*1))
             
                 # en passant    
-                if board[position[0], position[1]+1, OTHERSIDE(side)] == PAWN and boardInfo["lastMovePos"][1] == position[1]+1 and boardInfo["lastMovePos"][0] == position[0]:
+                if board[position[0], position[1]+1, OTHERSIDE(side)] == PAWN and boardInfo[side]["lastMovePos"][1] == position[1]+1 and boardInfo[side]["lastMovePos"][0] == position[0]:
                     moves.append((1,sideDir*1))
 
         if (0,sideDir*1) in moves:
@@ -197,7 +197,7 @@ class Bishop(Figure):
 
         moves = self.getLegalMovesByBoard(board, position, side)
 
-        moves = filterDiagonally(board, moves, position, side, level)
+        moves = filterDiagonally(board, moves, position, side)
 
         if level == 1:
             moves = filterForCheckNextMove(board, moves, position, side, piecesPos, pieceId, pieceIndex, boardInfo)
@@ -229,17 +229,13 @@ class Rook(Figure):
             (position[0]+y, position[1]+x) for x,y in moves
         ]
 
-def filterDiagonally(board: np.ndarray, moves, position: tuple, side: int, level: int):
+def filterDiagonally(board: np.ndarray, moves, position: tuple, side: int):
     for dX in [-1,1]:
             for dY in [-1,1]:
                 blocked = False
                 for x in range(1,8):
                     if blocked == True:
                         if (x*dX,x*dY) in moves:
-                            if level == 1:
-                                print("removed 1")
-                                print((position[0]+x*dY, position[1]+x*dX))
-                                print((x*dX, x*dY))
                             moves.remove((x*dX,x*dY))
                         continue
 
@@ -248,30 +244,15 @@ def filterDiagonally(board: np.ndarray, moves, position: tuple, side: int, level
                     # if we would check again with the board, itd yield an indexerror
                     # switched because moves is x,y but board is accessed with y,x
                     if (x*dX, x*dY) not in moves:
-                        if level == 1:
-                            print("blocked 1")
-                            print((position[0]+x*dY, position[1]+x*dX))
-                            print((x*dX, x*dY))
                         blocked = True
                         continue
 
                     if board[position[0]+x*dY, position[1]+x*dX, side] != 0:
                         if (x*dX,x*dY) in moves:
-                            if level == 1:
-                                print("removed 2")
-                                print((position[0]+x*dY, position[1]+x*dX))
-                                print((x*dX, *dY))
                             moves.remove((x*dX,x*dY))
-                        if level == 1:
-                            print("blocked 2")
-                            print((position[0]+x*dY, position[1]+x*dX))
-                            print((x*dX, x*dY))
                         blocked = True
 
                     if board[position[0]+x*dY, position[1]+x*dX, OTHERSIDE(side)] != 0:
-                        print("blocked 3")
-                        print((position[0]+x*dY, position[1]+x*dX))
-                        print((x*dX, x*dY))
                         blocked = True
 
     return moves
@@ -357,7 +338,9 @@ def filterForCheckNextMove(board: np.ndarray, moves, position: tuple, side: int,
         board2[position[0], position[1], side] = pieceId
         board2[position[0], position[1], OTHERSIDE(side)] = 0
 
-        boardInfo2 = updateBoardInfo(board2, boardInfo.copy(), piecesPosCopy, side, pieceId, pieceIndex, previousPosition)
+        boardInfo2 = {}
+        boardInfo2[0], boardInfo2[1] = boardInfo[0].copy(), boardInfo[1].copy()
+        boardInfo2[side] = updateBoardInfo(board2, boardInfo2[side], piecesPosCopy, side, pieceId, pieceIndex, previousPosition)
 
 
         canTakeThisMove = True

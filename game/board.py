@@ -17,13 +17,21 @@ class ChessBoard():
         "initialize board"
 
         self.board = np.zeros((8,8,2), dtype=np.byte)
-        self.boardInfo = {
-            "lastMovePos": (-1, -1),
-            "kingMoved": False,
-            "firstRookMoved": False,
-            "secondRookMoved": False,
-            "doPrintInfo": True
-        }
+        self.boardInfo = [
+            {
+                "lastMovePos": (-1, -1),
+                "kingMoved": False,
+                "firstRookMoved": False,
+                "secondRookMoved": False,
+                "doPrintInfo": True
+            }, {
+                "lastMovePos": (-1, -1),
+                "kingMoved": False,
+                "firstRookMoved": False,
+                "secondRookMoved": False,
+                "doPrintInfo": True
+            }
+        ]
 
         self.gamesDir = gamesDir
 
@@ -159,7 +167,7 @@ class ChessBoard():
         elif "=" in move.original:
             self.handlePromotion(move, piecePosIndex)
 
-        self.boardInfo = updateBoardInfo(self.board, self.boardInfo, self.piecesPos, move.side, move.p, piecePosIndex, previousPosition)
+        self.boardInfo[move.side] = updateBoardInfo(self.board, self.boardInfo[move.side], self.piecesPos, move.side, move.p, piecePosIndex, previousPosition)
 
         return True
 
@@ -246,10 +254,10 @@ class ChessBoard():
 
         print("\n\n".join(rows))
 
-    def saveGame(self, filename):
+    def saveGame(self, filename, moveIndex: int):
         np.save(self.gamesDir + "/" + filename, self.board, allow_pickle=True)
         
-        fileToSave = {"pp": self.piecesPos, "bi": self.boardInfo}
+        fileToSave = {"moveIndex": moveIndex, "pp": self.piecesPos, "bi": self.boardInfo}
         with open(self.gamesDir + "/" + filename + ".json", "w") as f:
             json.dump(fileToSave, f)
 
@@ -260,3 +268,5 @@ class ChessBoard():
             fileToLoad = json.load(f)
             self.piecePos = fileToLoad["pp"]
             self.boardInfo = fileToLoad["bi"]
+        
+        return fileToLoad["moveIndex"]

@@ -5,5 +5,5 @@ class Player():
     def __init__(self):
         raise NotImplementedError
 
-    def getMove(self, board: ChessBoard):
+    def getMove(self, gh):
         raise NotImplementedError
