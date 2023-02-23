@@ -101,38 +101,37 @@ class ChessBoard():
             }
         }
 
-
     def getBoard(self, dim: int = 1):
         "get the board either 1 or 2 dimensional"
 
         assert dim in (1,2)
 
-        # to implement
+        if dim == 2:
+            return self.board
+        else:
+            return self.board.ravel()
 
-    
     def makeMove(self, piecePos: tuple, move: Move, absolute=False):
         "move piece"
 
-        # currentPiecePos = self.piecesPos[move.side][move.p]
-        piecePosIndex = self.piecesPos[move.side][move.p].index(list(piecePos))
-        # previousPosition = currentPiecePos[piecePosIndex]
-
+        assert list(piecePos) in self.piecesPos[move.side][move.p]
         assert self.board[
             piecePos[0], piecePos[1], move.side
         ] != 0, "Move to make must be with an existing figure, none was found at that position"
 
-        assert list(piecePos) in self.piecesPos[move.side][move.p]
+        newPiecePos = (piecePos[0]+move.y, piecePos[1]+move.x)
+
+        currentPiecePos = self.piecesPos[move.side][move.p]
+        piecePosIndex = currentPiecePos.index(list(piecePos))
 
         self.board[
-            piecePos[0], piecePos[1], move.side
+            self.piecesPos[move.side][move.p][piecePosIndex][0], self.piecesPos[move.side][move.p][piecePosIndex][1], move.side
         ] = 0
 
         if not absolute:
-
             self.piecesPos[move.side][move.p][piecePosIndex][0] += move.y
             self.piecesPos[move.side][move.p][piecePosIndex][1] += move.x
         else:
-
             self.piecesPos[move.side][move.p][piecePosIndex][0] = move.y
             self.piecesPos[move.side][move.p][piecePosIndex][1] = move.x
 
@@ -146,19 +145,18 @@ class ChessBoard():
         if toRemove != None:
             del self.piecesPos[OTHERSIDE(move.side)][toRemove[0]][toRemove[1]]
             self.board[
-                piecePos[0],
-                piecePos[1],
+                self.piecesPos[move.side][move.p][piecePosIndex][0],
+                self.piecesPos[move.side][move.p][piecePosIndex][1],
                 OTHERSIDE(move.side)
             ] = 0
 
         self.board[
-                piecePos[0],
-                piecePos[1],
-                move.side
-            ] = move.p
+            self.piecesPos[move.side][move.p][piecePosIndex][0],
+            self.piecesPos[move.side][move.p][piecePosIndex][1],
+            move.side
+        ] = move.p
 
         # castling
-
         if move.original.lower() == "o-o":
             self.handleCastling(move, 0, 2)
             

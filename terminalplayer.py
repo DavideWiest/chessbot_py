@@ -43,9 +43,10 @@ class TerminalPlayer(Player):
             optionStr = ""
             
             for i in range(len(board.piecesPos[self.side][move2.p])):
-                p1YX = board.piecesPos[self.side][move2.p][i]
-                p1Pos = convertToStrMoveXY(p1YX)
-                optionStr += f"\n  {i} = {p1Pos}"
+                if (move2.y, move2.x) in legalMovesPositions[move2.p].values()[i]:
+                    p1YX = board.piecesPos[self.side][move2.p][i]
+                    p1Pos = convertToStrMoveXY(p1YX)
+                    optionStr += f"\n  {i} = {p1Pos}"
 
             try:
                 piecesPosIndex = int(input(f"Which piece? {optionStr} \n  ->"))

@@ -1,4 +1,3 @@
-
 pieces (pawn) not removed correctly (by loading?)
 -> resimulate with new save
 -> check if pawn positions make sense (did not in 1st save)
@@ -8,13 +7,11 @@ if queen takes pawn in game "o": king must take (make function filter check now)
 
 
 
-
-game saving: new move updating on board, but not in piecesPos
-checkforcheck: 
-
-
+checkforcheck
 in function: 
 if king currenty in check:
 -> must move or block or take piece
 if king in next move in check:
 -> cannot make move that unblocks king
+
+castling not working (invalid move, game t)
