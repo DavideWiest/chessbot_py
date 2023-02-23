@@ -270,7 +270,7 @@ def filterStraight(board: np.ndarray, moves, position: tuple, side: int):
 
                 if board[position[0]+dir*xOry, position[1], side] != 0:
                     if (0,dir*xOry) in moves:
-                        moves.remove((0,xOry))
+                        moves.remove((0,dir*xOry))
                     blockedY = True
 
                 if board[position[0]+dir*xOry, position[1], OTHERSIDE(side)] != 0:
