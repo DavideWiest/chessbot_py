@@ -113,23 +113,25 @@ class ChessBoard():
     def makeMove(self, piecePos: tuple, move: Move, absolute=False):
         "move piece"
 
-        currentPiecePos = self.piecesPos[move.side][move.p]
-        piecePosIndex = currentPiecePos.index(list(piecePos))
-        previousPosition = currentPiecePos[piecePosIndex]
+        # currentPiecePos = self.piecesPos[move.side][move.p]
+        piecePosIndex = self.piecesPos[move.side][move.p].index(list(piecePos))
+        # previousPosition = currentPiecePos[piecePosIndex]
+
+        assert self.board[
+            piecePos[0], piecePos[1], move.side
+        ] != 0, "Move to make must be with an existing figure, none was found at that position"
+
+        assert list(piecePos) in self.piecesPos[move.side][move.p]
 
         self.board[
-            currentPiecePos[piecePosIndex][0], currentPiecePos[piecePosIndex][1], move.side
+            piecePos[0], piecePos[1], move.side
         ] = 0
 
         if not absolute:
-            currentPiecePos[piecePosIndex][0] += move.y
-            currentPiecePos[piecePosIndex][1] += move.x
 
             self.piecesPos[move.side][move.p][piecePosIndex][0] += move.y
             self.piecesPos[move.side][move.p][piecePosIndex][1] += move.x
         else:
-            currentPiecePos[piecePosIndex][0] = move.y
-            currentPiecePos[piecePosIndex][1] = move.x
 
             self.piecesPos[move.side][move.p][piecePosIndex][0] = move.y
             self.piecesPos[move.side][move.p][piecePosIndex][1] = move.x
@@ -137,21 +139,21 @@ class ChessBoard():
         toRemove = None
         for enemyPId, enemyPiecesPos in self.piecesPos[OTHERSIDE(move.side)].items():
             for enemyPiecePos in enemyPiecesPos:
-                if enemyPiecePos == currentPiecePos[piecePosIndex]:
+                if enemyPiecePos == self.piecesPos[move.side][move.p][piecePosIndex]:
                     toRemove = (enemyPId, enemyPiecesPos.index(enemyPiecePos))
                     break
 
         if toRemove != None:
             del self.piecesPos[OTHERSIDE(move.side)][toRemove[0]][toRemove[1]]
             self.board[
-                currentPiecePos[piecePosIndex][0],
-                currentPiecePos[piecePosIndex][1],
+                piecePos[0],
+                piecePos[1],
                 OTHERSIDE(move.side)
             ] = 0
 
         self.board[
-                currentPiecePos[piecePosIndex][0],
-                currentPiecePos[piecePosIndex][1],
+                piecePos[0],
+                piecePos[1],
                 move.side
             ] = move.p
 
@@ -167,7 +169,7 @@ class ChessBoard():
         elif "=" in move.original:
             self.handlePromotion(move, piecePosIndex)
 
-        self.boardInfo[move.side] = updateBoardInfo(self.board, self.boardInfo[move.side], self.piecesPos, move.side, move.p, piecePosIndex, previousPosition)
+        self.boardInfo[move.side] = updateBoardInfo(self.board, self.boardInfo[move.side], self.piecesPos, move.side, move.p, piecePosIndex, piecePos)
 
         return True
 

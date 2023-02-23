@@ -10,20 +10,24 @@ import terminalplayer
 
 class GameHandler():
 
-    def __init__(self, playerWhite: Player, playerBlack: Player, gamesDir, autoSaveGame: str):
+    def __init__(self, playerWhite: Player, playerBlack: Player, gamesDir, autoSaveGame: str, autoSaveFilename: str=""):
         self.pW = playerWhite
         self.pB = playerBlack
-
+        
         self.autoSaveGame = autoSaveGame
-        self.autoSaveDT = datetime.now().strftime("%d-%m-%Y-%H-%M")
 
         self.board = ChessBoard(gamesDir)
         self.referee = Referee()
-
-    def run(self, moveIndex: int=0):
         
-        self.index = moveIndex
+        if autoSaveFilename == "":
+            self.autoSaveFilename = datetime.now().strftime("%d-%m-%Y-%H-%M")
+            self.index = 0
+        else:
+            self.autoSaveFilename = autoSaveFilename
+            self.index = self.board.loadGame(gameFilename)
 
+    def run(self):
+        
         # to implement 
         while self.referee.matchContinues():
             self.handleSingleMove()
@@ -46,18 +50,16 @@ class GameHandler():
             if not self.referee.isValidMove(move, piecesPosIndex): 
                 print("\n -> Invalid move! \n")
                 self.handleSingleMove()
-            else:
-                self.index += 1
-        else:
-            self.index += 1
+        
+        self.index += 1
 
         self.board.makeMove(piecePos, move, True)
 
         self.board.boardInfo[currentPlayer.side]["lastMovePos"] = (move.y, move.x)
 
         if self.autoSaveGame == "y" or self.autoSaveGame == "s" and self.index % 5 == 1:
-            self.board.saveGame(self.autoSaveDT, moveIndex)
-    
+            self.board.saveGame(self.autoSaveFilename, self.index)
+
 
 GAMES_DIR = "games"
 
@@ -86,17 +88,12 @@ if __name__ == "__main__":
     playerBlack = available_players[player0Id](0, COLORSTR_SIDE(0))
     playerWhite = available_players[player1Id](1, COLORSTR_SIDE(1))
 
-    loadGame = input("Filename of game to load (optional): ")
+    gameFilename = input("Filename of game to load (optional): ")
     autoSaveGame = input("Autosave (y / n / s = every 5th move) (optional, default n): ")
-    if autoSaveGame not in ("y", "n", "s"):
+    if autoSaveGame not in ("y", "s"):
         autoSaveGame = "n"
 
-    gh = GameHandler(playerWhite, playerBlack, GAMES_DIR, autoSaveGame)
+    gh = GameHandler(playerWhite, playerBlack, GAMES_DIR, autoSaveGame, gameFilename)
 
-    if loadGame != "":
-        moveIndex = gh.board.loadGame(loadGame)
-    else:
-        moveIndex = 0
-
-    gh.run(moveIndex)
+    gh.run()
 
