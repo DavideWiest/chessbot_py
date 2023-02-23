@@ -89,15 +89,15 @@ class Queen(Figure):
         
         if level==1:
             print("QUEEN MOVES")
-            print(moves)
+            print([(position[0]+y, position[1]+x) for x,y in moves])
         moves = filterStraight(board, moves, position, side)
         if level==1:
             print("QUEEN MOVES")
-            print(moves)
+            print([(position[0]+y, position[1]+x) for x,y in moves])
         moves = filterDiagonally(board, moves, position, side)
         if level==1:
             print("QUEEN MOVES")
-            print(moves)
+            print([(position[0]+y, position[1]+x) for x,y in moves])
 
         if level == 1:
             moves = filterForCheckNextMove(board, moves, position, side, piecesPos, pieceId, pieceIndex, boardInfo)
@@ -277,7 +277,6 @@ def filterStraight(board: np.ndarray, moves, position: tuple, side: int):
                     blockedY = True
 
             # x-moves
-            
             if blockedX == True:
                 if (dir*xOry, 0) in moves:
                     moves.remove((dir*xOry, 0))
@@ -308,7 +307,6 @@ def filterForCheckNextMove(board: np.ndarray, moves, position: tuple, side: int,
     ]
     for move in moves:
         position = (position_orig[0]+move[1], position_orig[1]+move[0])
-
 
         piecesPosCopy = {
             0: {
@@ -343,7 +341,7 @@ def filterForCheckNextMove(board: np.ndarray, moves, position: tuple, side: int,
             enemyPosition = tuple(piecesPosCopy[OTHERSIDE(side)][pieceId2][enemypieceIndex])
             enemyPieceMoves = PIECES_ID_TO_CLASS[pieceId2].getLegalMoves(board2, enemyPosition, OTHERSIDE(side), piecesPosCopy, pieceId2, enemypieceIndex, boardInfo2, level=2)
             combinedEnemyMoves += enemyPieceMoves
-                
+            
             if tuple(piecesPosCopy[side][KING][0]) in enemyPieceMoves:
                 print("checking vicinity of")
                 print(PIECES_ID_TO_NAME[pieceId2])

@@ -19,7 +19,8 @@ class TerminalPlayer(Player):
     def getMove(self, gh, legalMovesPositions: tuple):
         board = gh.board
 
-        print(str(board))
+        print(board.toString(0))
+        # print(board.toString(1))
 
         moveStr = input(f"Your Move ({self.color}): ")
 

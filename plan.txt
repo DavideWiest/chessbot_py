@@ -5,3 +5,16 @@ pieces (pawn) not removed correctly (by loading?)
 
 if queen takes pawn in game "o": king must take (make function filter check now)
 -> qc2 invalid move
+
+
+
+
+game saving: new move updating on board, but not in piecesPos
+checkforcheck: 
+
+
+in function: 
+if king currenty in check:
+-> must move or block or take piece
+if king in next move in check:
+-> cannot make move that unblocks king

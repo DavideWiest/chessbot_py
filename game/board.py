@@ -190,9 +190,12 @@ class ChessBoard():
         self.board[piecePos[0], piecePos[1], move.side] = pieceId
 
     def __repr__(self):
-        return self.__str__()
+        return self.toString()
 
     def __str__(self):
+        return self.toString()
+
+    def toString(self, preferredSide=0):
         rows = []
 
         for rowindex in range(8):
@@ -202,6 +205,10 @@ class ChessBoard():
                     self.preparePiece(self.board[rowindex, colindex, 0], 0)
                     if self.board[rowindex, colindex, 0] != 0 
                     else self.preparePiece(self.board[rowindex, colindex, 1], 1)
+                ) if preferredSide == 0 else str(
+                    self.preparePiece(self.board[rowindex, colindex, 1], 1)
+                    if self.board[rowindex, colindex, 1] != 0 
+                    else self.preparePiece(self.board[rowindex, colindex, 0], 0)
                 )
                 for colindex in range(8)
                 ))

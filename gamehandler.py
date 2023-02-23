@@ -56,7 +56,7 @@ class GameHandler():
         self.board.boardInfo[currentPlayer.side]["lastMovePos"] = (move.y, move.x)
 
         if self.autoSaveGame == "y" or self.autoSaveGame == "s" and self.index % 5 == 1:
-            self.board.saveGame(self.autoSaveDT)
+            self.board.saveGame(self.autoSaveDT, moveIndex)
     
 
 GAMES_DIR = "games"
