@@ -12,31 +12,64 @@ class moveSimulator():
         self.referee = referee
         self.nestedMoves = {}
         self.side = side
+        self.depth = depth
 
         self.bestMoveScore = float("inf")
         self.lastMove = None
 
-        # getMoveNodes of the deepest move nodes with alternating side
-        for pid in legalMovesPositions:
-            for moveYX in legalMovesPositions:
-                dph = 0
-                # save infos to roll back
-                pieceAtYX = self.board[moveYX[0], moveYX[1], OTHERSIDE(side)]
-                self.nestedMoves[(pid, moveYX[0], moveYX[1])] = self.getMoveNodes()
-                # roll back board
+        # begin loop
+        self.nestedMoves = self.iterLegalMoves(legalMovesPositions)
 
-    def getMoveNodes(self):
+    def iterLegalMoves(self, legalMovesPositions, currentSide, depth=0):
+        # getMoveNodes of the deepest move nodes with alternating side
+        nestedNextMoves = {}
+        for pId in legalMovesPositions:
+            for i, moveYX in legalMovesPositions[pId].items():
+                piecePos = self.board.piecePos[currentSide][pId][i]
+                nestedNextMoves[(pId, moveYX[0], moveYX[1])] = self.simulateMove(pId, moveYX, piecePos, currentSide, depth)
+        return nestedNextMoves
+    
+    def simulateMove(self, pId, moveYX, piecePos, currentSide, depth=0):
+        # save infos to roll back
+        boardBefore = self.board.board.copy()
+        piecesPosBefore = copy.deepcopy(self.board.piecesPos)
+        gameState = copy.deepcopy(self.board.boardInfo)
+        if depth >= self.depth:
+            self.evalDeepest()
+        else:
+            move = MoveWithInts(pId, moveYX[1], moveYX[0], currentSide, piecePos)
+            self.board.makeMove(move)
+            legalMovesPositions = self.getLegalMoves()
+            if len(self.board.piecePos[OTHERSIDE(currentSide)][KING]) == 0:
+                self.referee.setWinner(OTHERSIDE(currentSide))
+            if self.referee.winner != None:
+                if self.referee.winner == self.side:
+                    return 1
+                else:
+                    return -1
+
+            return self.iterLegalMoves(legalMovesPositions, OTHERSIDE(currentSide), depth+1)
+        
+        # roll back board
+        self.board.board = boardBefore
+        self.board.piecesPos = piecesPosBefore
+        self.boardInfo = gameState
+
+    def getLegalMoves(self, currentSide):
         "get legal or expected next move (1)"
 
         self.referee.winner = None
         self.referee.allLegalMoves = {}
-        self.referee.computeAllLegalMoves()
+        self.referee.computeAllLegalMoves(self.board, currentSide)
         return self.referee.allLegalMoves
 
     def bestMoveGenerator(self):
         "yield best move, yield best move thats lower than self.bestMoveScore, then update it accordingly, returns list of Move"
 
+        # recursively find mean strength, starting from the deepest
+
     def evalDeepest(self):
+        "evaluate player strength compared to enemy player strength, and normalize into a value from -1 to 1"
         pass
 
 class AlgoPlayer(Player):

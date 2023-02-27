@@ -61,7 +61,7 @@ class GameHandler():
         self.board.makeMove(piecePos, move, True)
 
         if len(self.board.piecePos[OTHERSIDE(move.side)][KING]) == 0:
-            self.referee.setWinnerById(OTHERSIDE(move.side))
+            self.referee.setWinner(OTHERSIDE(move.side))
 
         self.board.boardInfo[currentPlayer.side]["lastMovePos"] = (move.y, move.x)
 

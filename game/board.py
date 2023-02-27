@@ -111,8 +111,10 @@ class ChessBoard():
         else:
             return self.board.ravel()
 
-    def makeMove(self, piecePos: tuple, move: Move, absolute=False):
+    def makeMove(self, move: Move, absolute=False):
         "move piece"
+
+        piecePos = move.pPos
 
         assert list(piecePos) in self.piecesPos[move.side][move.p]
         assert self.board[

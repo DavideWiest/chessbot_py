@@ -23,20 +23,20 @@ class Referee():
                 # print("----")
 
         # piece moves sum by piece id
-        print(self.allLegalMoves)
+        # print(self.allLegalMoves)
 
         # sum of all possible moves
-        print(sum(
-            sum(len(moves) for moves in piecesMovesById.values()) 
-            for piecesMovesById in self.allLegalMoves.values()
-        ))
+        # print(sum(
+        #     sum(len(moves) for moves in piecesMovesById.values()) 
+        #     for piecesMovesById in self.allLegalMoves.values()
+        # ))
 
         if sum(
             sum(len(moves) for moves in piecesMovesById.values()) 
             for piecesMovesById in self.allLegalMoves.values()
         ) < 1:
             print("winner has been")
-            self.winner = COLOR_SIDE(side) + COLORSTR_SIDE(side) + Fore.RESET
+            self.winner = OTHERSIDE(side)
 
 
     def isValidMove(self, move: Move, pieceIndex: int):
@@ -50,7 +50,7 @@ class Referee():
         return self.winner == None
 
     def getWinner(self):
-        return self.winner
+        return COLOR_SIDE(self.winner) + COLORSTR_SIDE(self.winner) + Fore.RESET
     
-    def setWinnerById(self, winnerId):
-        self.winner = COLOR_SIDE(winnerId) + COLORSTR_SIDE(winnerId) + Fore.RESET
+    def setWinner(self, winnerId):
+        self.winner = winnerId
