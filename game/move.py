@@ -68,6 +68,9 @@ class Move():
         self.p = piece
         self.x = posX
         self.y = posY
+
+    def __repr__(self):
+        return f"{self.original}: {PIECES_ID_TO_NAME[self.p]} to {ascii_lowercase[self.x]}{self.y+1}"
         
 
 class MoveWithInts(Move):

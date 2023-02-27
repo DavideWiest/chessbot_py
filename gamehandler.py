@@ -6,15 +6,20 @@ from game.referee import *
 
 from datetime import datetime
 import sys
+import time
+
 import terminalplayer
+import algoplayer
+import algoplayerchecking
 
 class GameHandler():
 
-    def __init__(self, playerWhite: Player, playerBlack: Player, gamesDir, autoSaveGame: str, autoSaveFilename: str=""):
+    def __init__(self, playerWhite: Player, playerBlack: Player, gamesDir, autoSaveGame: str, autoSaveFilename: str="", timebuffer: int=0):
         self.pW = playerWhite
         self.pB = playerBlack
         
         self.autoSaveGame = autoSaveGame
+        self.timebuffer = timebuffer
 
         self.board = ChessBoard(gamesDir)
         self.referee = Referee()
@@ -49,17 +54,22 @@ class GameHandler():
         if currentPlayer.needsValidityChecked:
             if not self.referee.isValidMove(move, piecesPosIndex): 
                 print("\n -> Invalid move! \n")
-                self.handleSingleMove()
+                return
         
         self.index += 1
 
         self.board.makeMove(piecePos, move, True)
+
+        if len(self.board.piecePos[OTHERSIDE(move.side)][KING]) == 0:
+            self.referee.setWinnerById(OTHERSIDE(move.side))
 
         self.board.boardInfo[currentPlayer.side]["lastMovePos"] = (move.y, move.x)
 
         if self.autoSaveGame == "y" or self.autoSaveGame == "s" and self.index % 5 == 1:
             self.board.saveGame(self.autoSaveFilename, self.index)
 
+        if self.timebuffer:
+            time.sleep(self.timebuffer)
 
 GAMES_DIR = "games"
 
@@ -67,7 +77,9 @@ if __name__ == "__main__":
     # run game
 
     available_players = [
-        terminalplayer.TerminalPlayer
+        terminalplayer.TerminalPlayer,
+        algoplayer.AlgoPlayer,
+        algoplayerchecking.AlgoPlayerChecking
     ]
 
     if len(sys.argv) > 2:
@@ -92,8 +104,12 @@ if __name__ == "__main__":
     autoSaveGame = input("Autosave (y / n / s = every 5th move) (optional, default n): ")
     if autoSaveGame not in ("y", "s"):
         autoSaveGame = "n"
+    
+    timebuffer = input("Time buffer (input in s, default 0): ")
+    if not timebuffer.isnumeric():
+        timebuffer = 0
 
-    gh = GameHandler(playerWhite, playerBlack, GAMES_DIR, autoSaveGame, gameFilename)
+    gh = GameHandler(playerWhite, playerBlack, GAMES_DIR, autoSaveGame, gameFilename, timebuffer)
 
     gh.run()
 

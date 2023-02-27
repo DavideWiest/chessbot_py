@@ -36,7 +36,7 @@ class Referee():
             for piecesMovesById in self.allLegalMoves.values()
         ) < 1:
             print("winner has been")
-            self.winner = "black" if side == "white" else "white"
+            self.winner = COLOR_SIDE(side) + COLORSTR_SIDE(side) + Fore.RESET
 
 
     def isValidMove(self, move: Move, pieceIndex: int):
@@ -51,3 +51,6 @@ class Referee():
 
     def getWinner(self):
         return self.winner
+    
+    def setWinnerById(self, winnerId):
+        self.winner = COLOR_SIDE(winnerId) + COLORSTR_SIDE(winnerId) + Fore.RESET

@@ -87,17 +87,17 @@ class Queen(Figure):
 
         # sort out moves that are blocked
         
-        if level==1:
-            print("QUEEN MOVES")
-            print([(position[0]+y, position[1]+x) for x,y in moves])
-        moves = filterStraight(board, moves, position, side)
-        if level==1:
-            print("QUEEN MOVES")
-            print([(position[0]+y, position[1]+x) for x,y in moves])
-        moves = filterDiagonally(board, moves, position, side)
-        if level==1:
-            print("QUEEN MOVES")
-            print([(position[0]+y, position[1]+x) for x,y in moves])
+        # if level==1:
+        #     print("QUEEN MOVES")
+        #     print([(position[0]+y, position[1]+x) for x,y in moves])
+        # moves = filterStraight(board, moves, position, side)
+        # if level==1:
+        #     print("QUEEN MOVES")
+        #     print([(position[0]+y, position[1]+x) for x,y in moves])
+        # moves = filterDiagonally(board, moves, position, side)
+        # if level==1:
+        #     print("QUEEN MOVES")
+        #     print([(position[0]+y, position[1]+x) for x,y in moves])
 
         if level == 1:
             moves = filterForCheckNextMove(board, moves, position, side, piecesPos, pieceId, pieceIndex, boardInfo)
@@ -330,9 +330,9 @@ def filterForCheckNextMove(board: np.ndarray, moves, position: tuple, side: int,
         boardInfo2[0], boardInfo2[1] = boardInfo[0].copy(), boardInfo[1].copy()
         boardInfo2[side] = updateBoardInfo(board2, boardInfo2[side], piecesPosCopy, side, pieceId, pieceIndex, previousPosition)
 
-        if pieceId == QUEEN:
-            print("QUEEN")
-            print(move)
+        # if pieceId == QUEEN:
+        #     print("QUEEN")
+        #     print(move)
 
         canTakeThisMove = True
         for pieceId2, enemypieceIndex in allEnemyPieces:
