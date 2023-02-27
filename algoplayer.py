@@ -34,20 +34,20 @@ class moveSimulator():
         boardBefore = self.board.board.copy()
         piecesPosBefore = copy.deepcopy(self.board.piecesPos)
         gameState = copy.deepcopy(self.board.boardInfo)
+        move = MoveWithInts(pId, moveYX[1], moveYX[0], currentSide, piecePos)
+        self.board.makeMove(move)
+        legalMovesPositions = self.getLegalMoves()
+        if len(self.board.piecePos[OTHERSIDE(currentSide)][KING]) == 0:
+            self.referee.setWinner(OTHERSIDE(currentSide))
+        if self.referee.winner != None:
+            if self.referee.winner == self.side:
+                return 1
+            else:
+                return -1
+            
         if depth >= self.depth:
-            self.evalDeepest()
+            self.evalDeepest(legalMovesPositions)
         else:
-            move = MoveWithInts(pId, moveYX[1], moveYX[0], currentSide, piecePos)
-            self.board.makeMove(move)
-            legalMovesPositions = self.getLegalMoves()
-            if len(self.board.piecePos[OTHERSIDE(currentSide)][KING]) == 0:
-                self.referee.setWinner(OTHERSIDE(currentSide))
-            if self.referee.winner != None:
-                if self.referee.winner == self.side:
-                    return 1
-                else:
-                    return -1
-
             return self.iterLegalMoves(legalMovesPositions, OTHERSIDE(currentSide), depth+1)
         
         # roll back board
@@ -68,9 +68,13 @@ class moveSimulator():
 
         # recursively find mean strength, starting from the deepest
 
-    def evalDeepest(self):
+    def evalDeepest(self, legalMovesPositions):
         "evaluate player strength compared to enemy player strength, and normalize into a value from -1 to 1"
-        pass
+        k = 0.001
+
+        # iterate over board, use legal moves
+
+        # use meanTilesThreatening[pId]
 
 class AlgoPlayer(Player):
 
