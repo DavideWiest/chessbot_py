@@ -335,30 +335,13 @@ def filterForCheckNextMove(board: np.ndarray, moves, position: tuple, side: int,
             print(move)
 
         canTakeThisMove = True
-        # positionsToCheckLater = []
-        # combinedEnemyMoves = []
-
         for pieceId2, enemypieceIndex in allEnemyPieces:
             enemyPosition = tuple(piecesPosCopy[OTHERSIDE(side)][pieceId2][enemypieceIndex])
             enemyPieceMoves = PIECES_ID_TO_CLASS[pieceId2].getLegalMoves(board2, enemyPosition, OTHERSIDE(side), piecesPosCopy, pieceId2, enemypieceIndex, boardInfo2, level=2)
-            # combinedEnemyMoves += enemyPieceMoves
             
             if tuple(piecesPosCopy[side][KING][0]) in enemyPieceMoves:
-                # print("checking vicinity of")
-                # print(PIECES_ID_TO_NAME[pieceId2])
-                # print(tuple(piecesPosCopy[side][KING][0]))
-                # print(tuple(piecesPosCopy[side][KING][0]) in vicinityOf(enemyPosition, 1))
-                # if tuple(piecesPosCopy[side][KING][0]) in vicinityOf(enemyPosition, 1):
-                #     positionsToCheckLater.append(enemyPosition)
-                # else:
-                    canTakeThisMove = False
-                    break
-
-        # print("check if king could take the piece")
-        # print([pos in combinedEnemyMoves for pos in positionsToCheckLater])
-        # print(any(pos in combinedEnemyMoves for pos in positionsToCheckLater))
-        # if any(pos in combinedEnemyMoves for pos in positionsToCheckLater):
-        #     canTakeThisMove = False
+                canTakeThisMove = False
+                break
         
         # check if king could take the piece that checks it
         if canTakeThisMove:
