@@ -16,7 +16,7 @@ class TerminalPlayer(Player):
         self.needsAllLegalMoves = True
 
 
-    def getMove(self, gh, legalMovesPositions: tuple):
+    def getMove(self, gh, legalMovesPositions):
         board = gh.board
 
         print(board.toString(0))

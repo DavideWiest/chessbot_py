@@ -8,8 +8,10 @@ import copy
 import json
 from statistics import median
 
+DEPTH = 3
+
 class moveSimulator():
-    def __init__(self, board: ChessBoard, referee: Referee, side: int, legalMovesPositions, depth=3):
+    def __init__(self, board: ChessBoard, referee: Referee, side: int, legalMovesPositions, depth=DEPTH):
         self.board = copy.deepcopy(board)
         self.referee = referee
         self.nestedMoves = {}
@@ -39,6 +41,7 @@ class moveSimulator():
         move = MoveWithInts(pId, moveYX[1], moveYX[0], currentSide, piecePos)
         self.board.makeMove(move)
         legalMovesPositions = self.getLegalMoves(currentSide)
+
         if len(self.board.piecePos[OTHERSIDE(currentSide)][KING]) == 0:
             self.referee.setWinner(OTHERSIDE(currentSide))
         if self.referee.winner != None:
@@ -111,7 +114,7 @@ class ChessBoardEvaluator():
 
         for pId in self.piecesPos[self.side]:
             for pIndex in range(len(self.piecesPos[self.side])):
-                pos = tuple(self.piecesPos[self.side][pId][pIndex])
+                # pos = tuple(self.piecesPos[self.side][pId][pIndex])
                 legalMoves = self.lmp[pId][pIndex]
                 pStrength += self._getPieceValue(pId) \
                     * (self._getTilesThreatening(legalMoves, self.side) \
@@ -120,7 +123,7 @@ class ChessBoardEvaluator():
         
         for pId in self.piecesPos[OTHERSIDE(self.side)]:
             for pIndex in range(len(self.piecesPos[OTHERSIDE(self.side)])):
-                pos = tuple(self.piecesPos[OTHERSIDE(self.side)][pId][pIndex])
+                # pos = tuple(self.piecesPos[OTHERSIDE(self.side)][pId][pIndex])
                 legalMoves = self.lmp[pId][pIndex]
                 eStrength += self._getPieceValue(pId) \
                     * (self._getTilesThreatening(legalMoves, OTHERSIDE(self.side)) \
@@ -130,17 +133,20 @@ class ChessBoardEvaluator():
         return pStrength / ((pStrength + eStrength) / 2) - 1
 
     def _getPieceValue(self, pId):
-        if pId == 0: return 0.2
+        # if pId == 0: return 0.2
         if pId == 4: return 3.5
         return pId
 
     def _getTilesThreatening(self, legalMoves, currentSide):
-        return len(move for move in legalMoves if self.board.board[move[0], move[1], currentSide] == 0)
-        
+        return len(move for move in legalMoves if self.board.board[move[0], move[1], OTHERSIDE(currentSide)] == 0)
+    
+    def _getTilesThreateningByPieceId(self, legalMoves, pId, currentSide):
+        return len(move for move in legalMoves[pId] if self.board.board[move[0], move[1], OTHERSIDE(currentSide)] == 0)
+
     def _getMeanTilesThreatening(self, pId):
         return self.meanTilesThreatening[pId]
     
-    def _getThreatenedAndProtectedBy(self, currentSide, pId, pIndex):
+    def _getThreatenedAndProtectedBy(self, currentSide, pId, pIndex, returnValueForStrengthCalc=True):
         # delete piece
         # get legal moves and check how often it is inside the legal moves list of a piece
         # if checkmate: return k
@@ -165,7 +171,10 @@ class ChessBoardEvaluator():
                 if legalMoves1[pId2][pIndex2] == pos:
                     threatenedBy += (self.maxPieceValue - self._getPieceValue(pId2) + self.pieceK)
 
-        return min(protectedBy / threatenedBy, self.maxMul)
+        if returnValueForStrengthCalc:
+            return min(protectedBy / threatenedBy, self.maxMul)
+        else:
+            return threatenedBy, protectedBy
 
 class AlgoPlayer(Player):
 

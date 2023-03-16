@@ -10,34 +10,38 @@ class Referee():
         self.allLegalMoves = {}
         pass
 
-    def computeAllLegalMoves(self, board: ChessBoard, side: int):
-        self.allLegalMoves = {
+    def computeAllLegalMoves(self, board: ChessBoard, side: int, returnLegalMoves: bool = False):
+        allLegalMoves = {
             pId: {} for pId in list(PIECES_ID_TO_STR)
         }
         for pieceId in board.piecesPos[side]:
             for pieceIndex, piecePos in enumerate(board.piecesPos[side][pieceId]):
-                self.allLegalMoves[pieceId][pieceIndex] = PIECES_ID_TO_CLASS[pieceId].getLegalMoves(board.board, tuple(piecePos), side, board.piecesPos, pieceId, pieceIndex, board.boardInfo)
+                allLegalMoves[pieceId][pieceIndex] = PIECES_ID_TO_CLASS[pieceId].getLegalMoves(board.board, tuple(piecePos), side, board.piecesPos, pieceId, pieceIndex, board.boardInfo)
     
                 # board.visualizeLegalMoves(pieceId, pieceIndex, side, 2, self.allLegalMoves[pieceId][pieceIndex])
                 # print(PIECES_ID_TO_NAME[pieceId])
                 # print("----")
 
         # piece moves sum by piece id
-        # print(self.allLegalMoves)
+        # print(allLegalMoves)
 
         # sum of all possible moves
         # print(sum(
         #     sum(len(moves) for moves in piecesMovesById.values()) 
-        #     for piecesMovesById in self.allLegalMoves.values()
+        #     for piecesMovesById in allLegalMoves.values()
         # ))
 
         if sum(
             sum(len(moves) for moves in piecesMovesById.values()) 
-            for piecesMovesById in self.allLegalMoves.values()
+            for piecesMovesById in allLegalMoves.values()
         ) < 1:
             print("winner has been")
-            self.winner = OTHERSIDE(side)
+            if returnLegalMoves == False: self.winner = OTHERSIDE(side)
 
+        if returnLegalMoves:
+            return allLegalMoves
+        else:
+            self.allLegalMoves = allLegalMoves
 
     def isValidMove(self, move: Move, pieceIndex: int):
 
