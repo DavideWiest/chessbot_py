@@ -9,10 +9,11 @@ import json
 from statistics import median
 
 DEPTH = 3
+TEMP_MAX_PIECE_VALUE = 10
 
 class moveSimulator():
     def __init__(self, board: ChessBoard, referee: Referee, side: int, legalMovesPositions, depth=DEPTH):
-        self.board = copy.deepcopy(board)
+        self.chboard = copy.deepcopy(board)
         self.referee = referee
         self.nestedMoves = {}
         self.side = side
@@ -29,20 +30,20 @@ class moveSimulator():
         nestedNextMoves = {}
         for pId in legalMovesPositions:
             for i, moveYX in legalMovesPositions[pId].items():
-                piecePos = self.board.piecePos[currentSide][pId][i]
+                piecePos = self.chboard.piecePos[currentSide][pId][i]
                 nestedNextMoves[(pId, i, moveYX[0], moveYX[1])] = self.simulateMove(pId, moveYX, piecePos, currentSide, depth)
         return nestedNextMoves
     
     def simulateMove(self, pId, moveYX, piecePos, currentSide, depth=0):
         # save infos to roll back
-        boardBefore = self.board.board.copy()
-        piecesPosBefore = copy.deepcopy(self.board.piecesPos)
-        gameState = copy.deepcopy(self.board.boardInfo)
+        boardBefore = self.chboard.board.copy()
+        piecesPosBefore = copy.deepcopy(self.chboard.piecesPos)
+        gameState = copy.deepcopy(self.chboard.boardInfo)
         move = MoveWithInts(pId, moveYX[1], moveYX[0], currentSide, piecePos)
-        self.board.makeMove(move)
+        self.chboard.makeMove(move)
         legalMovesPositions = self.getLegalMoves(currentSide)
 
-        if len(self.board.piecePos[OTHERSIDE(currentSide)][KING]) == 0:
+        if len(self.chboard.piecePos[OTHERSIDE(currentSide)][KING]) == 0:
             self.referee.setWinner(OTHERSIDE(currentSide))
         if self.referee.winner != None:
             if self.referee.winner == self.side:
@@ -52,13 +53,13 @@ class moveSimulator():
             
         if depth >= self.depth:
             enemyLegalMovesPos = self.getLegalMoves(OTHERSIDE(currentSide))
-            cbe = ChessBoardEvaluator(self.board, self.referee, legalMovesPositions, enemyLegalMovesPos, self.board.piecesPos, self.side)
+            cbe = ChessBoardEvaluator(self.chboard, self.referee, legalMovesPositions, enemyLegalMovesPos, self.chboard.piecesPos, self.side)
             return cbe.evalDeepest()
         else:
             # roll back board
-            self.board.board = boardBefore
-            self.board.piecesPos = piecesPosBefore
-            self.boardInfo = gameState
+            self.chboard.board = boardBefore
+            self.chboard.piecesPos = piecesPosBefore
+            self.chboardInfo = gameState
             return self.iterLegalMoves(legalMovesPositions, OTHERSIDE(currentSide), depth+1)
         
 
@@ -67,7 +68,7 @@ class moveSimulator():
 
         self.referee.winner = None
         self.referee.allLegalMoves = {}
-        self.referee.computeAllLegalMoves(self.board, currentSide)
+        self.referee.computeAllLegalMoves(self.chboard, currentSide)
         return self.referee.allLegalMoves
     
     def simplifyToSingleNum(self, branch):
@@ -82,25 +83,78 @@ class moveSimulator():
         movesByValue = {k: v for k, v in sorted(movesByValue.items(), key=lambda item: item[1])}
 
         for pId, pIndex, Y, X in movesByValue.keys():
-            move = MoveWithInts(pId, X, Y, self.side, tuple(self.board.piecesPos[self.side][pId][pIndex]))
+            move = MoveWithInts(pId, X, Y, self.side, tuple(self.chboard.piecesPos[self.side][pId][pIndex]))
             yield move
 
-class ChessBoardEvaluator():
+class ChessBoardAnalyzer():
     def __init__(self, board: ChessBoard, referee: Referee, legalMovesPos, enemyLegalMovesPos, piecesPos, side):
-        self.board = board
+        self.chboard = board
         self.referee = referee
         self.lmp = legalMovesPos
         self.elmp = enemyLegalMovesPos
         self.piecesPos = piecesPos
         self.side = side
-        # to prevent zerodivisionerror
-        self.k = 0.00001
+        self.maxPieceValue = TEMP_MAX_PIECE_VALUE 
+
         # maximal multiplication of a piece value when calculating threatened and protected by
         self.maxMul = 5
-        # used to bring factor closer to 1, reducing its weight 
-        self.nthSquareRoot = 1/3.5
+        # to prevent zerodivisionerror
+        self.k = 0.00001
         # pure value of threats, even if enemy piece is protected by lower value piece
         self.pieceK = 0.5
+
+    def _getPieceValue(self, pId):
+        # if pId == 0: return 0.2
+        if pId == 4: return 3.5
+        return pId
+
+    def _getTilesThreatening(self, legalMoves, currentSide):
+        return len(move for move in legalMoves if self.chboard.board[move[0], move[1], OTHERSIDE(currentSide)] == 0)
+    
+    def _getTilesThreateningByPieceId(self, legalMoves, pId, currentSide):
+        return len(move for move in legalMoves[pId] if self.chboard.board[move[0], move[1], OTHERSIDE(currentSide)] == 0)
+    
+    def _getThreatenedAndProtectedBy(self, currentSide, pId, pIndex, returnValueForStrengthCalc=True):
+        # delete piece
+        # get legal moves and check how often it is inside the legal moves list of a piece
+        # if checkmate: return k
+
+        threatenedBy = self.k
+        protectedBy = 0
+
+        pos = tuple(self.piecesPos[currentSide][pId][pIndex])
+        del self.piecesPos[currentSide][pId][pIndex]
+        self.chboard.board[pos[0], pos[1], currentSide] = 0
+
+        legalMoves1 = self.referee.computeAllLegalMoves(self.chboard, currentSide)
+        legalMoves2 = self.referee.computeAllLegalMoves(self.chboard, OTHERSIDE(currentSide))
+
+        for pId2 in legalMoves1:
+            for pIndex2 in legalMoves1[pId2]:
+                if legalMoves1[pId2][pIndex2] == pos:
+                    protectedBy += (self.maxPieceValue - self._getPieceValue(pId2) + self.pieceK)
+
+        for pId2 in legalMoves2:
+            for pIndex2 in legalMoves2[pId2]:
+                if legalMoves1[pId2][pIndex2] == pos:
+                    threatenedBy += (self.maxPieceValue - self._getPieceValue(pId2) + self.pieceK)
+
+        if returnValueForStrengthCalc:
+            return min(protectedBy / threatenedBy, self.maxMul)
+        else:
+            return threatenedBy, protectedBy
+
+class ChessBoardEvaluator(ChessBoardAnalyzer):
+    def __init__(self, board: ChessBoard, referee: Referee, legalMovesPos, enemyLegalMovesPos, piecesPos, side):
+        super().__init__(board, referee, legalMovesPos, enemyLegalMovesPos, piecesPos, side)
+        self.chboard = board
+        self.referee = referee
+        self.lmp = legalMovesPos
+        self.elmp = enemyLegalMovesPos
+        self.piecesPos = piecesPos
+        self.side = side
+        # used to bring factor closer to 1, reducing its weight 
+        self.nthSquareRoot = 1/3.5
 
         with open("data/meanTilesThreatening.json", "r") as f:
             self.meanTilesThreatening = {int(pId): v for pId, v in json.load(f).items()}
@@ -132,49 +186,9 @@ class ChessBoardEvaluator():
                 
         return pStrength / ((pStrength + eStrength) / 2) - 1
 
-    def _getPieceValue(self, pId):
-        # if pId == 0: return 0.2
-        if pId == 4: return 3.5
-        return pId
-
-    def _getTilesThreatening(self, legalMoves, currentSide):
-        return len(move for move in legalMoves if self.board.board[move[0], move[1], OTHERSIDE(currentSide)] == 0)
-    
-    def _getTilesThreateningByPieceId(self, legalMoves, pId, currentSide):
-        return len(move for move in legalMoves[pId] if self.board.board[move[0], move[1], OTHERSIDE(currentSide)] == 0)
-
     def _getMeanTilesThreatening(self, pId):
         return self.meanTilesThreatening[pId]
-    
-    def _getThreatenedAndProtectedBy(self, currentSide, pId, pIndex, returnValueForStrengthCalc=True):
-        # delete piece
-        # get legal moves and check how often it is inside the legal moves list of a piece
-        # if checkmate: return k
 
-        threatenedBy = self.k
-        protectedBy = 0
-
-        pos = tuple(self.piecesPos[currentSide][pId][pIndex])
-        del self.piecesPos[currentSide][pId][pIndex]
-        self.board[pos[0], pos[1], currentSide] = 0
-
-        legalMoves1 = self.referee.computeAllLegalMoves(self.board, currentSide)
-        legalMoves2 = self.referee.computeAllLegalMoves(self.board, OTHERSIDE(currentSide))
-
-        for pId2 in legalMoves1:
-            for pIndex2 in legalMoves1[pId2]:
-                if legalMoves1[pId2][pIndex2] == pos:
-                    protectedBy += (self.maxPieceValue - self._getPieceValue(pId2) + self.pieceK)
-
-        for pId2 in legalMoves2:
-            for pIndex2 in legalMoves2[pId2]:
-                if legalMoves1[pId2][pIndex2] == pos:
-                    threatenedBy += (self.maxPieceValue - self._getPieceValue(pId2) + self.pieceK)
-
-        if returnValueForStrengthCalc:
-            return min(protectedBy / threatenedBy, self.maxMul)
-        else:
-            return threatenedBy, protectedBy
 
 class AlgoPlayer(Player):
 

@@ -29,7 +29,10 @@ class GameHandler():
             self.index = 0
         else:
             self.autoSaveFilename = autoSaveFilename
-            self.index = self.board.loadGame(gameFilename)
+            try:
+                self.index = self.board.loadGameReturnMoveIndex(autoSaveFilename)
+            except NoSuchGameSaved:
+                self.index = 0
 
     def run(self):
         

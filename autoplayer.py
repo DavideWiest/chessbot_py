@@ -1,7 +1,7 @@
 from game.player import Player
 from game.move import *
 from game.relations import PIECES_ID_TO_STR
-from algoplayer import ChessBoardEvaluator
+from algoplayer import ChessBoardAnalyzer
 from datamanipulation import getAvgOf2Dicts, getAvgOf2DList
 import traceback
 
@@ -16,21 +16,23 @@ DATA_PIECES_AT_INDEX = [
 
 class AutoPlayer(Player):
     def __init__(self, moves, side, analyzeBoard=True):
+        self.needsAllLegalMoves = True
+        self.needsValidityChecked = False
         self.moves = moves
         self.side = side
         self.analyzeBoard = analyzeBoard
         self.keys = DATA_PIECES_AT_INDEX
-        self.numBoardAnalysis = 0
-        self.data = {
-            {} for i in range(len(self.keys))
-        }
+        self.numBoardAnalyses = 0
+        self.data = [
+            {} for _ in range(len(self.keys))
+        ]
 
     def doBoardAnalysis(self, gh, legalMovesPositions):
         lmpDict = {
             self.side: legalMovesPositions,
             OTHERSIDE(self.side): gh.referee.computeAllLegalMoves(gh.board, OTHERSIDE(self.side), True)
         }
-        cbe = ChessBoardEvaluator(gh.board, gh.referee, legalMovesPositions, )
+        cbe = ChessBoardAnalyzer(gh.board, gh.referee, legalMovesPositions, lmpDict[OTHERSIDE(self.side)], gh.board.piecesPos, self.side)
 
         # temporarily storing it in a variable because the 2 return values will be saved separately
         numPiecesExistingP0 = {pId: len(lmpDict[0][pId]) for pId in PIECES_ID_TO_STR}
@@ -49,43 +51,43 @@ class AutoPlayer(Player):
             getAvgOf2Dicts(
                 self.data[0],
                 {pId: cbe._getMeanTilesThreateningByPieceId(lmpDict[0], pId, 0) for pId in PIECES_ID_TO_STR},
-                self.numBoardAnalysis
+                self.numBoardAnalyses
             ),
             getAvgOf2Dicts(
                 self.data[1],
                 {pId: cbe._getMeanTilesThreateningByPieceId(lmpDict[1], pId, 1) for pId in PIECES_ID_TO_STR},
-                self.numBoardAnalysis
+                self.numBoardAnalyses
             ),
             getAvgOf2Dicts(
                 self.data[2],
                 {pId: threatenedAndProtectedByP0[pId][0] for pId in PIECES_ID_TO_STR},
-                self.numBoardAnalysis
+                self.numBoardAnalyses
             ),
             getAvgOf2Dicts(
                 self.data[3],
                 {pId: threatenedAndProtectedByP1[pId][0] for pId in PIECES_ID_TO_STR},
-                self.numBoardAnalysis
+                self.numBoardAnalyses
             ),
             getAvgOf2Dicts(
                 self.data[4],
                 {pId: threatenedAndProtectedByP0[pId][1] for pId in PIECES_ID_TO_STR},
-                self.numBoardAnalysis
+                self.numBoardAnalyses
             ),
             getAvgOf2Dicts(
                 self.data[5],
                 {pId: threatenedAndProtectedByP1[pId][1] for pId in PIECES_ID_TO_STR},
-                self.numBoardAnalysis
+                self.numBoardAnalyses
             ),
         ]
-        
+        # TODO: simplify this with list comprehension, + operator and zip of ranges
 
     def getMove(self, gh, legalMovesPositions):
-        self.numBoardAnalysis += 1
+        self.numBoardAnalyses += 1
 
         if self.analyzeBoard:
-            self.doBoardAnalysis(gh)
+            self.doBoardAnalysis(gh, legalMovesPositions)
 
-        moveStr = self.move[self.numBoardAnalysis]
+        moveStr = self.move[self.numBoardAnalyses]
 
         try:
             move2 = Move(moveStr, self.side, (0,0))

@@ -6,6 +6,10 @@ from .boardfuncs import updateBoardInfo
 from string import ascii_uppercase
 from colorama import Fore, Back, Style
 import json
+import os.path
+
+class NoSuchGameSaved(Exception):
+    pass
 
 class ChessBoard():
     """"
@@ -121,6 +125,7 @@ class ChessBoard():
             piecePos[0], piecePos[1], move.side
         ] != 0, "Move to make must be with an existing figure, none was found at that position"
 
+        # WHAT is this
         newPiecePos = (piecePos[0]+move.y, piecePos[1]+move.x)
 
         currentPiecePos = self.piecesPos[move.side][move.p]
@@ -270,10 +275,16 @@ class ChessBoard():
         with open(self.gamesDir + "/" + filename + ".json", "w") as f:
             json.dump(fileToSave, f)
 
-    def loadGame(self, filename):
-        self.board = np.load(self.gamesDir + "/" + filename + ".npy", allow_pickle=True)
+    def loadGameReturnMoveIndex(self, filename):
+        boardLoc = self.gamesDir + "/" + filename + ".npy"
+        gameStateLoc = self.gamesDir + "/" + filename + ".json"
+
+        if not os.path.isfile(boardLoc) or not os.path.isfile(gameStateLoc):
+            raise NoSuchGameSaved()
+
+        self.board = np.load(boardLoc, allow_pickle=True)
             
-        with open(self.gamesDir + "/" + filename + ".json", "r") as f:
+        with open(gameStateLoc, "r") as f:
             fileToLoad = json.load(f)
             self.piecePos = fileToLoad["pp"]
             self.boardInfo = fileToLoad["bi"]
